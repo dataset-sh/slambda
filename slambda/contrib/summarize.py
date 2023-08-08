@@ -1,0 +1,17 @@
+from slambda.core import TextFunction, Template, Message
+
+template = Template(
+    name="summarize",
+    init_messages=[
+        Message.system(''),
+        Message.example_user(
+            'Due to how affordable the clothing is and how new trends convince consumers to seek out more, '
+            'the value of clothes may diminish in the eyes of consumers. '
+            'As of 2019, the current report shows that 62 million metric tons of apparel were consumed globally.'),
+        Message.example_assistant(
+            'One of the significant differences is that airplanes have more '
+            'limitations to taking off and manuvering in different spaces than a helicopters')
+    ],
+),
+
+summarize = TextFunction(template)
