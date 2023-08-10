@@ -1363,7 +1363,7 @@
     url-loader "^4.1.1"
     webpack "^5.73.0"
 
-"@docusaurus/module-type-aliases@2.4.1":
+"@docusaurus/module-type-aliases@2.4.1", "@docusaurus/module-type-aliases@^2.4.1":
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/@docusaurus/module-type-aliases/-/module-type-aliases-2.4.1.tgz#38b3c2d2ae44bea6d57506eccd84280216f0171c"
   integrity sha512-gLBuIFM8Dp2XOCWffUDSjtxY7jQgKvYujt7Mx5s4FCTfoL5dN1EVbnrn+O2Wvh8b0a77D57qoIDY7ghgmatR1A==
@@ -2266,6 +2266,11 @@
   resolved "https://registry.yarnpkg.com/@trysound/sax/-/sax-0.2.0.tgz#cccaab758af56761eb7bf37af6f03f326dd798ad"
   integrity sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==
 
+"@tsconfig/docusaurus@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@tsconfig/docusaurus/-/docusaurus-2.0.0.tgz#cadc77ab84052ffaaa4d6f79e998d719efa50e56"
+  integrity sha512-X5wptT7pXA/46/IRFTW76oR5GNjoy9qjNM/1JGhFV4QAsmLh3YUpJJA+Vpx7Ds6eEBxSxz1QrgoNEBy6rLVs8w==
+
 "@types/body-parser@*":
   version "1.19.2"
   resolved "https://registry.yarnpkg.com/@types/body-parser/-/body-parser-1.19.2.tgz#aea2059e28b7658639081347ac4fab3de166e6f0"
@@ -2389,6 +2394,11 @@
   version "7.0.12"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.12.tgz#d70faba7039d5fca54c83c7dbab41051d2b6f6cb"
   integrity sha512-Hr5Jfhc9eYOQNPYO5WLDq/n4jqijdHNlDXjuAQkkt+mWdQR+XJToOHrsD4cPaMXpn6KO7y2+wM8AZEs8VpBLVA==
+
+"@types/lodash@^4.14.197":
+  version "4.14.197"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.197.tgz#e95c5ddcc814ec3e84c891910a01e0c8a378c54b"
+  integrity sha512-BMVOiWs0uNxHVlHBgzTIqJYmj+PgCo4euloGF+5m4okL3rEYzM2EEv78mw8zWSMM57dM7kVIgJ2QDvwHSoCI5g==
 
 "@types/mdast@^3.0.0":
   version "3.0.12"
@@ -7499,6 +7509,11 @@ typedarray-to-buffer@^3.1.5:
   integrity sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==
   dependencies:
     is-typedarray "^1.0.0"
+
+typescript@^5.1.6:
+  version "5.1.6"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.1.6.tgz#02f8ac202b6dad2c0dd5e0913745b47a37998274"
+  integrity sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==
 
 ua-parser-js@^1.0.35:
   version "1.0.35"

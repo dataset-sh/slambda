@@ -1,16 +1,23 @@
-from slambda.core import TextFunction, Template, Message
+from slambda.core import TextFunction, Template, Message, Example
+
+examples = [
+    Example(
+        input={
+            'premise': 'Wasps are attracted to sweet foods and beverages, as well as protein-based sources.',
+            'hypothesis': 'Wasp like sugary drinks',
+        },
+        output='true'
+    )
+]
 
 template = Template(
     name="entail",
-    init_messages=[
-        Message.system('Answer true if premise entail hypothesis, false otherwise.'),
-        Message.example_user("premise: What can i do for you?\nhypothesis: asking user to provide request"),
-        Message.example_assistant('true'),
-        Message.example_user("premise: What can i do for you?\nhypothesis: providing user weather information"),
-        Message.example_assistant('false'),
-    ],
+    description="",
     temperature=0,
     message_template="premise: {premise}\nhypothesis: {hypothesis}",
+).follow_instruction(
+    instruction='Answer true if premise entail hypothesis, false otherwise.',
+    examples=examples,
 )
 
 entail = TextFunction(template)

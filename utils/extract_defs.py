@@ -28,11 +28,12 @@ def list_functions(doc_base='./slambda-doc'):
     all_function_scripts = list_scripts(contrib_dir, recursive=True)
 
     for fn in all_function_scripts:
+        print(f"Extracting {fn}..")
         fip = f"slambda.contrib.{fn}"
-        templates, fns = get_function(fip)
+        fns = get_function(fip)
         json_data = {
-            'templates': templates,
             'fns': fns,
+            'module_name': fip,
         }
 
         if '.' in fn:
@@ -80,19 +81,19 @@ def ensure_doc_parent_exists(doc_base):
 
 def get_function(name):
     fn_module = importlib.import_module(name)
-    templates = {}
     fns = []
     for item_name in dir(fn_module):
         item = getattr(fn_module, item_name)
-        if isinstance(item, Template):
-            templates[item_name] = item.model_dump(mode='json', exclude_none=True)
-        if isinstance(item, Template):
-            fns.append(item_name)
-    return templates, fns
+        if isinstance(item, TextFunction):
+            fns.append({
+                "name": item_name,
+                "template": item.template.model_dump(mode='json', exclude_none=True)
+            })
+    return fns
 
 
 def run():
-    print(list_functions())
+    list_functions()
 
 
 if __name__ == '__main__':

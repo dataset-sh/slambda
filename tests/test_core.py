@@ -2,13 +2,13 @@ import unittest
 from unittest import TestCase
 import unittest.mock as mock
 
-from slambda.core import Template, TextFunction, TextFunctionMode, Message, Role
+from slambda.core import Template, TextFunction, TextFunctionMode, Message, Role, Example
 
 
 def side_effect_function(**kwargs):
     # You can define your custom logic here based on kwargs
     # This is a simple example which returns different text based on the model
-    if kwargs['n'] == 1:
+    if kwargs.get('n', 1) == 1:
         return {
             'choices': [
                 {
@@ -52,7 +52,7 @@ class TestTextFunction(TestCase):
         out = f()
         self.assertEqual('ONLY MODEL OUTPUT', out)
 
-        out = f(n=5)
+        out = f(__override={"n": 5})
         self.assertListEqual([create_fake_response(i) for i in range(5)], out)
         with self.assertRaises(ValueError) as context:
             f('', some_value=123)
@@ -65,8 +65,7 @@ class TestTextFunction(TestCase):
                 {'role': 'system', 'content': 'A system message'},
                 {'role': 'user', 'content': 'this receive no arg'}
             ],
-            temperature=1.0,
-            n=1
+
         ), mock_openai_api.call_args_list[0].kwargs)
 
         self.assertDictEqual(dict(
@@ -75,7 +74,6 @@ class TestTextFunction(TestCase):
                 {'role': 'system', 'content': 'A system message'},
                 {'role': 'user', 'content': 'this receive no arg'}
             ],
-            temperature=1.0,
             n=5
         ), mock_openai_api.call_args_list[1].kwargs)
 
@@ -102,8 +100,6 @@ class TestTextFunction(TestCase):
                 {'role': 'system', 'content': 'A system message'},
                 {'role': 'user', 'content': 'hello'}
             ],
-            temperature=1.0,
-            n=1
         ), mock_openai_api.call_args_list[0].kwargs)
 
     @mock.patch('openai.ChatCompletion.create')
@@ -126,8 +122,6 @@ class TestTextFunction(TestCase):
                 {'role': 'system', 'content': 'A system message'},
                 {'role': 'user', 'content': 'arg 1: Apple, arg 2: 10'}
             ],
-            temperature=1.0,
-            n=1
         ), mock_openai_api.call_args_list[0].kwargs)
 
     @mock.patch('openai.ChatCompletion.create')
@@ -286,3 +280,73 @@ class TestMessage(TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class TestTemplate(TestCase):
+    def test_shortcut_constructor(self):
+        self.assertEqual(
+            Message.system(content='A system message'),
+            Message(role='system', content='A system message')
+        )
+
+        self.assertEqual(
+            Message.user(content='A user message'),
+            Message(role='user', content='A user message')
+        )
+
+        self.assertEqual(
+            Message.assistant(content='A assistant message'),
+            Message(role='assistant', content='A assistant message')
+        )
+
+        self.assertEqual(
+            Message.example_user(content='A system message'),
+            Message(role='system', content='A system message', name='example_user')
+        )
+
+        self.assertEqual(
+            Message.example_assistant(content='A system message'),
+            Message(role='system', content='A system message', name='example_assistant')
+        )
+
+    def test_follow_instruction(self):
+        self.maxDiff = None
+        t = Template(
+            init_messages=[
+                Message.system('A system message')
+            ],
+            default_message='this receive no arg'
+        )
+
+        self.assertListEqual(
+            [Message(role='system', content='A system message')],
+            t.init_messages
+        )
+
+        t.follow_instruction(
+            'this is a instruction'
+        )
+
+        self.assertListEqual(
+            [Message(role='system', content='this is a instruction')],
+            t.init_messages
+        )
+
+        examples = [
+            Example(f"i-{i}", f"o-{i}") for i in range(2)
+        ]
+
+        t.follow_instruction(
+            'this is the 2nd instruction', examples
+        )
+
+        self.assertListEqual(
+            [
+                Message(role='system', content='this is the 2nd instruction'),
+                Message(role='system', content='i-0', name='example_user'),
+                Message(role='system', content='o-0', name='example_assistant'),
+                Message(role='system', content='i-1', name='example_user'),
+                Message(role='system', content='o-1', name='example_assistant'),
+            ],
+            t.init_messages
+        )

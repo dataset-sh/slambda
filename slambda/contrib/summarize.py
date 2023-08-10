@@ -2,8 +2,9 @@ from slambda.core import TextFunction, Template, Message
 
 template = Template(
     name="summarize",
+    description="This function summarize a given text",
     init_messages=[
-        Message.system(''),
+        Message.system('You are an assistant that summarize user input.'),
         Message.example_user(
             'Due to how affordable the clothing is and how new trends convince consumers to seek out more, '
             'the value of clothes may diminish in the eyes of consumers. '
@@ -12,6 +13,6 @@ template = Template(
             'One of the significant differences is that airplanes have more '
             'limitations to taking off and manuvering in different spaces than a helicopters')
     ],
-),
+)
 
 summarize = TextFunction(template)
