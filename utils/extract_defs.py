@@ -44,24 +44,42 @@ def list_functions(doc_base='./slambda-doc'):
             doc_base = os.path.join(doc_base, 'docs', 'functions', base_name)
             doc_path = os.path.join(doc_base, 'docs', 'functions', base_name, f"{func_name}.mdx")
             ensure_doc_parent_exists(doc_base)
-            ensure_doc_exists(doc_path)
+            ensure_doc_exists(doc_path, name=func_name, path=f"{base_name}/{func_name}")
         else:
             func_name = fn
             json_path = os.path.join(doc_base, 'src', 'data', f"{func_name}.json")
             doc_path = os.path.join(doc_base, 'docs', 'functions', f"{func_name}.mdx")
-            ensure_doc_exists(doc_path)
+            ensure_doc_exists(doc_path, name=func_name, path=func_name)
 
         with open(json_path, 'w') as out:
             json.dump(json_data, out)
     return all_function_scripts
 
 
-def ensure_doc_exists(doc_path):
+DOC_TEMPLATE = """
+---
+title: {name}
+sidebar_position: 3
+---
+
+import {{TextFnModuleView}} from "@site/src/components/TextFnTemplate"
+import FnData from "@site/src/data/{path}.json"
+
+# summarize
+
+<TextFnModuleView
+    module_name={{FnData.module_name}}
+    fns={{FnData.fns}}
+/>
+""".strip()
+
+
+def ensure_doc_exists(doc_path, name, path):
     if os.path.exists(doc_path):
         return
     else:
         with open(doc_path, 'w') as out:
-            out.write('')
+            out.write(DOC_TEMPLATE.format(name=name, path=path))
 
 
 def ensure_doc_parent_exists(doc_base):

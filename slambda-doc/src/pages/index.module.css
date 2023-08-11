@@ -21,24 +21,3 @@
   align-items: center;
   justify-content: center;
 }
-
-[data-theme='dark'] {
-  --ifm-color-primary: #30a3bb;
-  --ifm-color-primary-dark: #2b93a8;
-  --ifm-color-primary-darker: #298b9f;
-  --ifm-color-primary-darkest: #227283;
-  --ifm-color-primary-light: #37b2cc;
-  --ifm-color-primary-lighter: #40b6ce;
-  --ifm-color-primary-lightest: #5cc0d5;
-}
-
-:root {
-  --ifm-color-primary: #164b56;
-  --ifm-color-primary-dark: #14434d;
-  --ifm-color-primary-darker: #134049;
-  --ifm-color-primary-darkest: #0f343c;
-  --ifm-color-primary-light: #18525f;
-  --ifm-color-primary-lighter: #195663;
-  --ifm-color-primary-lightest: #1d6170;
-}
-

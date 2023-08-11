@@ -10,28 +10,6 @@ import { Button, Typography } from '@mui/material';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import styles from './index.module.css';
 
-function HomepageHeader() {
-  const { siteConfig } = useDocusaurusContext();
-  return (
-    <header className={clsx('hero hero--primary', styles.heroBanner)}>
-      <div
-        className="container"
-
-      >
-        <h1 className="hero__title">{siteConfig.title}</h1>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
-        <div className={styles.buttons}>
-          <Link
-            className="button button--secondary button--lg"
-            to="/docs/intro">
-            Docusaurus Tutorial - 5min ⏱️
-          </Link>
-        </div>
-      </div>
-    </header>
-  );
-}
-
 export default function Home() {
   const { siteConfig } = useDocusaurusContext();
   return (
@@ -41,10 +19,13 @@ export default function Home() {
       <Box
         component={'main'}
         sx={{
-          background: "url('/img/bg.svg')",
+          // background: "url('/img/bg.svg')",
           backgroundRepeat: "no-repeat",
           backgroundSize: 'contain',
-          minHeight: '90vh',
+          height: {
+            // xs: '100%',
+            // md: '90vh',
+          },
           display: 'flex',
           flexDirection: 'column',
           alignItems: "center",

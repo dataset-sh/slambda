@@ -5,7 +5,7 @@ sidebar_position: 3
 
 ## Create TextFunction
 
-In this example, we will create extremly simple sentiment clasfier using a `TextFunction` , so we can do this
+In this example, we will create an extremly simple sentiment classifier using a `TextFunction`, so we can do this
 
 ```py
 from .sl_tutorial import sentiment
@@ -19,7 +19,7 @@ print(sentiment('the food is so bad!'))
 
 We can do this in two ways:
 * Using a standard `Template`
-* Using Instruction and Examples
+* Using `Instruction` and `Examples`
 
 ### Using a standard Template
 ```py

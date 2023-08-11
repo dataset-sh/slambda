@@ -15,6 +15,7 @@ template = Template(
     description="",
     temperature=0,
     message_template="premise: {premise}\nhypothesis: {hypothesis}",
+    required_args=['premise', 'hypothesis'],
 ).follow_instruction(
     instruction='Answer true if premise entail hypothesis, false otherwise.',
     examples=examples,

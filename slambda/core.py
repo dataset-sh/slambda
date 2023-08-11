@@ -69,16 +69,20 @@ class TextFunctionMode(str, Enum):
     """
 
 
-@dataclass
-class Example:
-    input: Union[Dict, str]
+class Example(BaseModel):
+    input: Optional[Union[Dict, str]] = None
     output: str
 
-    def to_str_pair(self):
+    def __init__(self, input=None, output=None, **kwargs):
+        super().__init__(input=input, output=output, **kwargs)
+
+    def to_str_pair(self, template: 'Template'):
+        if self.input is None:
+            return template.default_message, self.output
         if isinstance(self.input, str):
             return self.input, self.output
         elif isinstance(self.input, dict):
-            return "\n".join([f"{k}: {v}" for k, v in self.input.items()]), self.output
+            return template.message_template.format(**self.input), self.output
 
 
 class Template(BaseModel):
@@ -99,6 +103,8 @@ class Template(BaseModel):
         init_messages: A list of messages comprising the conversation so far, this can be used for providing.
         default_message: this message will be sent if no args are provided.
         message_template: this message will be rendered with keyword arguments if kwargs are provided.
+        required_args: list of required keyword args.
+        examples: call examples
         model: which model to use, the model must be compatible with [OpenAI's chatCompletion API](https://platform.openai.com/docs/models/model-endpoint-compatibility)
         temperature: What sampling temperature to use, between 0 and 2. See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
         n: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
@@ -120,6 +126,8 @@ class Template(BaseModel):
     init_messages: List[Message] = Field(default_factory=list)
     default_message: Optional[str] = None
     message_template: Optional[str] = None
+    required_args: Optional[List[str]] = None
+    examples: List[Example] = Field(default_factory=list)
 
     # OpenAI parameters
     model: str = 'gpt-3.5-turbo'
@@ -148,6 +156,12 @@ class Template(BaseModel):
                 self.mode.append(TextFunctionMode.KEYWORD)
             if len(self.mode) == 0:
                 self.mode.append(TextFunctionMode.POS)
+
+        if self.required_args is not None and len(self.required_args) > 0:
+            if len(self.mode) != 1 and TextFunctionMode.KEYWORD not in self.mode:
+                raise Warning('required_args is provided, self.mode will be set to [TextFunctionMode.KEYWORD] '
+                              'and default_message will be ignored')
+                self.mode = [TextFunctionMode.KEYWORD]
 
     def find_call_mode(self, *args, **kwargs) -> TextFunctionMode:
         """
@@ -197,13 +211,14 @@ class Template(BaseModel):
         if examples is not None:
             for example in examples:
                 assert isinstance(example, Example), "example must be an instance of Example"
-                input_, output = example.to_str_pair()
+                input_, output = example.to_str_pair(self)
                 self.init_messages.append(
                     Message.example_user(input_)
                 )
                 self.init_messages.append(
                     Message.example_assistant(output)
                 )
+            self.examples = examples
 
         return self
 
@@ -370,6 +385,11 @@ class TextFunction:
                 ctrl_kws[k] = v
             else:
                 kwargs[k] = v
+
+        if template.required_args is not None:
+            for key in template.required_args:
+                if key not in kwargs:
+                    raise ValueError(f'{key} is required but not provided')
 
         messages = [
             m for m in template.init_messages
