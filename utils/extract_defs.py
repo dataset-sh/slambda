@@ -65,7 +65,7 @@ sidebar_position: 3
 import {{TextFnModuleView}} from "@site/src/components/TextFnTemplate"
 import FnData from "@site/src/data/{path}.json"
 
-# summarize
+# {name}
 
 <TextFnModuleView
     module_name={{FnData.module_name}}
