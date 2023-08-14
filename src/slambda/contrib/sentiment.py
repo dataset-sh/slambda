@@ -20,4 +20,4 @@ template = Template(
     examples=examples,
 )
 
-motivate_me = TextFunction(template)
+sentiment = TextFunction(template)
