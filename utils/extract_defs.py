@@ -2,7 +2,7 @@ import json
 import os
 import importlib
 
-from slambda.core import Template, TextFunction
+from src.slambda.core import TextFunction
 
 
 def list_scripts(base_dir, recursive=False):
@@ -23,7 +23,7 @@ def list_scripts(base_dir, recursive=False):
 
 
 def list_functions(doc_base='./slambda-doc'):
-    import slambda.contrib
+    from src import slambda
     contrib_dir = slambda.contrib.__path__[0]
     all_function_scripts = list_scripts(contrib_dir, recursive=True)
 

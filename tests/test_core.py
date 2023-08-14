@@ -2,7 +2,7 @@ import unittest
 from unittest import TestCase
 import unittest.mock as mock
 
-from slambda.core import Template, TextFunction, TextFunctionMode, Message, Role, Example
+from src.slambda.core import Template, TextFunction, TextFunctionMode, Message, Role, Example
 
 
 def side_effect_function(**kwargs):

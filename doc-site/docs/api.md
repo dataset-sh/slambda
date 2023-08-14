@@ -11,31 +11,31 @@ sidebar_position: 4
 Template is an ChatGPT API call template. Check [OpenAI's API reference](https://platform.openai.com/docs/api-reference/chat/create)
 for more information.
 
-
 ```py
-from slambda import  Template
+from slambda import Template
+
 template = Template(
-    name= ..., # name: Optional[str] = None
-    description= ..., # description: str = ''
-    mode= ..., # mode: List[TextFunctionMode] = Field(default_factory=list)
+    name=...,  # name: Optional[str] = None
+    description=...,  # description: str = ''
+    mode=...,  # mode: List[TextFunctionMode] = Field(default_factory=list)
 
     # Message Config
-    init_messages= ..., # init_messages: List[Message] = Field(default_factory=list)
-    default_message= ..., # default_message: Optional[str] = None
-    message_template= ..., # message_template: Optional[str] = None
+    init_messages=...,  # init_messages: List[Message] = Field(default_factory=list)
+    default_message=...,  # default_message: Optional[str] = None
+    message_template=...,  # message_template: Optional[str] = None
 
     # OpenAI ChatComplemetion Endpoint parameters
-    model= ..., # model: str = 'gpt-3.5-turbo'
-    temperature= ..., # temperature: Optional[float] = None
-    n= ..., # n: Optional[int] = None
-    top_p= ..., # top_p: Optional[float] = None
-    stream= ..., # stream: Optional[bool] = None
-    stop= ..., # stop: Optional[Union[str, List[str]]] = None
-    max_tokens= ..., # max_tokens: Optional[int] = None
-    presence_penalty= ..., # presence_penalty: Optional[float] = None
-    frequency_penalty= ..., # frequency_penalty: Optional[float] = None
-    logit_bias= ..., # logit_bias: Optional[Dict[int, int]] = None
-    user= ..., # user: Optional[str] = None
+    model=...,  # model: str = 'gpt-3.5-turbo'
+    temperature=...,  # temperature: Optional[float] = None
+    n=...,  # n: Optional[int] = None
+    top_p=...,  # top_p: Optional[float] = None
+    stream=...,  # stream: Optional[bool] = None
+    stop=...,  # stop: Optional[Union[str, List[str]]] = None
+    max_tokens=...,  # max_tokens: Optional[int] = None
+    presence_penalty=...,  # presence_penalty: Optional[float] = None
+    frequency_penalty=...,  # frequency_penalty: Optional[float] = None
+    logit_bias=...,  # logit_bias: Optional[Dict[int, int]] = None
+    user=...,  # user: Optional[str] = None
 )
 ```
 * **name**: optional name of this template.
@@ -71,6 +71,7 @@ t = Template().follow_instruction(
 
 ```py
 from slambda import TextFunction, Template
+
 my_function = TextFunction(Template(default_message=''))
 my_function()
 ```
@@ -84,8 +85,10 @@ nullary_function()
 ```
 
 #### Execution Mode: Keyword Args
+
 ```py
 from slambda import TextFunction, Template
+
 f = TextFunction(Template(message_template="send today's date: ({date}) to ChatCompletion API"))
 f(date="2023-01-01")
 ```
@@ -117,6 +120,7 @@ If neither `default_message` nor `message_template` is provided, you can call th
 
 ```py
 from slambda import TextFunction, Template
+
 f = TextFunction(Template())
 f('send this to ChatCompletion API')
 f('send this to ChatCompletion API', "and this")

@@ -38,7 +38,8 @@ We provide python functions for NLP tasks through zero/one/few shot learning usi
 
 ```py
 
-from slambda.contrib.sentiment import sentiment
+from slambda import sentiment
+
 print(sentiment('the food is great !') == 'positive')
 # Output: True
 ```

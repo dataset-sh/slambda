@@ -22,19 +22,21 @@ We can do this in two ways:
 * Using `Instruction` and `Examples`
 
 ### Using a standard Template
+
 ```py
 # sl_tutorial.py
 
 from slambda import TextFunction, Template, Message
+
 f = TextFunction(Template(
-  init_messages = [
-    Message.system('Answer positive if sentence has positive general sentiment, otherwise answer negative.'),
-    Message.example_user('The food is great'),
-    Message.example_assistant('positive'),
-    Message.example_user('The food is awful'),
-    Message.example_assistant('negative'),
-  ],
-  tempature=0,
+    init_messages=[
+        Message.system('Answer positive if sentence has positive general sentiment, otherwise answer negative.'),
+        Message.example_user('The food is great'),
+        Message.example_assistant('positive'),
+        Message.example_user('The food is awful'),
+        Message.example_assistant('negative'),
+    ],
+    tempature=0,
 ))
 sentiment = TextFunction(t)
 
@@ -50,12 +52,13 @@ sentiment = TextFunction(t)
 # sl_tutorial.py
 
 from slambda import Template, Example
+
 t = Template(tempature=0).follow_instruction(
-  instruction = "Answer positive if sentence has positive general sentiment, otherwise answer negative.",
-  examples = [
-    Example("The food is great", "positive"),
-    Example("The food is awful", "negative")
-  ]
+    instruction="Answer positive if sentence has positive general sentiment, otherwise answer negative.",
+    examples=[
+        Example("The food is great", "positive"),
+        Example("The food is awful", "negative")
+    ]
 )
 
 sentiment = TextFunction(t)
