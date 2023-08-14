@@ -1,4 +1,4 @@
-from src.slambda.core import TextFunction, Template, Example
+from slambda.core import TextFunction, Template, Example
 
 examples = [
     Example(
