@@ -20,7 +20,12 @@ Please check [OpenAI's documentation: Authentication](https://platform.openai.co
 you need to create a new API key.
 
 If you have encountered this error:
-> AuthenticationError: No API key provided. You can set your API key in code using 'openai.api_key = <API-KEY>', or you can set the environment variable OPENAI_API_KEY=<API-KEY>). If your API key is stored in a file, you can point the openai module at it with 'openai.api_key_path = <PATH>'. You can generate API keys in the OpenAI web interface. See https://platform.openai.com/account/api-keys for details.
+```
+AuthenticationError: No API key provided. You can set your API key in code using 'openai.api_key = <API-KEY>', 
+or you can set the environment variable OPENAI_API_KEY=<API-KEY>). If your API key is stored in a file, 
+you can point the openai module at it with 'openai.api_key_path = <PATH>'. You can generate API keys in the OpenAI web 
+interface. See https://platform.openai.com/account/api-keys for details.
+```
 
 It means that you need to supply `OPENAI_API_KEY` somewhere in your code. 
 
