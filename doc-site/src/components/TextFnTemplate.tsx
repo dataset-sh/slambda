@@ -2,7 +2,7 @@ import { Box, Card, Chip, Typography } from "@mui/material"
 import React from "react"
 import _ from "lodash"
 import CodeBlock from '@theme/CodeBlock';
-import { purple, red, orange, grey, green, blue } from '@mui/material/colors';
+import { purple, red, orange, grey, green, blue, yellow } from '@mui/material/colors';
 
 type Role = 'system' | 'user' | 'assistant' | 'function'
 type Message = {
@@ -101,7 +101,7 @@ export function TextFnTemplateView({
     }).join("\n")
 
     return <Box>
-        <Box sx={{bgcolor: grey[50]}}>
+        <Box sx={{ bgcolor: grey[50] }}>
             {template.description && <Typography>{template.description}</Typography>}
         </Box>
         <CodeBlock title={'Usage'} language="py">
@@ -171,28 +171,29 @@ export function MessageView({
 
     let messageTypeBadge;
     let bgColor;
+    let badgeDirection: 'left' | 'right' = 'left';
     switch (messageType) {
         case "System":
             bgColor = grey[100]
             messageTypeBadge = <Chip label={'System'} sx={{ bgcolor: bgColor, borderRadius: 1 }} />
-
             break;
         case "User":
-            bgColor = red[50]
+            badgeDirection = 'right'
+            bgColor = green[200]
             messageTypeBadge = <Chip label={"User"} sx={{ bgcolor: bgColor, borderRadius: 1 }} />
-
             break;
         case "Assistant":
-            bgColor = red[50]
+            bgColor = blue[200]
             messageTypeBadge = <Chip label={"Assistant"} sx={{ bgcolor: bgColor, borderRadius: 1 }} />
 
             break;
         case "Function":
-            bgColor = red[50]
+            bgColor = yellow[200]
             messageTypeBadge = <Chip label={"Function"} sx={{ bgcolor: bgColor, borderRadius: 1 }} />
 
             break;
         case "ExampleUser":
+            badgeDirection = 'right'
             bgColor = green[50]
             messageTypeBadge = <Chip label={"ExampleUser"} sx={{ bgcolor: bgColor, borderRadius: 1 }} />
 
@@ -212,7 +213,12 @@ export function MessageView({
         px: 2, py: 1, mb: 1,
         display: 'flex', flexDirection: 'column'
     }}>
-        <Box sx={{ mb: 1 }}>
+        <Box sx={{
+            mb: 1,
+             display: 'flex',
+            flexDirection: badgeDirection === 'left' ? 'row' : 'row-reverse',
+            justifyContent: messageType === 'System' ? 'center' : undefined
+            }}>
             {messageTypeBadge}
         </Box>
         <Box sx={{
