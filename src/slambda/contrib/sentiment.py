@@ -8,7 +8,12 @@ examples = [
     Example(
         input="Bought this new HyperGadget Pro and what a disappointment! It feels cheap, doesn't work as advertised, and the battery life is a joke. Save your money and avoid this one.",
         output="negative"
+    ),
+    Example(
+        input="I ate at this restaurant yesterday.",
+        output="neutral"
     )
+
 ]
 
 template = Template(
@@ -16,7 +21,7 @@ template = Template(
     description="Detect sentiment of the given text",
     temperature=0,
 ).follow_instruction(
-    instruction='Detect sentiment of the given text, anser positive for positive sentiment otherwise negative.',
+    instruction='Detect sentiment of the given text, answer positive for positive sentiment, negative for negative sentiment, otherwise neutral.',
     examples=examples,
 )
 

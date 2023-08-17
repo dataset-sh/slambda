@@ -13,7 +13,7 @@ exclude = [
 
 [project]
 name = "slambda"
-version = "0.0.3"
+version = "0.0.4"
 authors = [
     { name = "Hao Wu", email = "haowu@dataset.sh" },
 ]

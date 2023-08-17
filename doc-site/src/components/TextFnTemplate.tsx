@@ -211,18 +211,26 @@ export function MessageView({
         borderWidth: '1px',
         borderStyle: 'solid',
         px: 2, py: 1, mb: 1,
-        display: 'flex', flexDirection: 'column'
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: badgeDirection === 'left' ? 'flex-start' : 'flex-end',
     }}>
         <Box sx={{
             mb: 1,
-             display: 'flex',
+            display: 'flex',
             flexDirection: badgeDirection === 'left' ? 'row' : 'row-reverse',
             justifyContent: messageType === 'System' ? 'center' : undefined
             }}>
+
             {messageTypeBadge}
         </Box>
         <Box sx={{
-            bgcolor: bgColor, p: 1, borderRadius: 1,
+            bgcolor: bgColor,
+            p: 1,
+            borderRadius: 1,
+            width: '80%',
+            minWidth: '30em',
+            textAlign: badgeDirection
         }}>
             {content}
         </Box>

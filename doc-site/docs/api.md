@@ -15,27 +15,27 @@ for more information.
 from slambda import Template
 
 template = Template(
-    name=...,  # name: Optional[str] = None
-    description=...,  # description: str = ''
-    mode=...,  # mode: List[TextFunctionMode] = Field(default_factory=list)
+  name=...,  # name: Optional[str] = None
+  description=...,  # description: str = ''
+  mode=...,  # mode: List[TextFunctionMode] = Field(default_factory=list)
 
-    # Message Config
-    init_messages=...,  # init_messages: List[Message] = Field(default_factory=list)
-    default_message=...,  # default_message: Optional[str] = None
-    message_template=...,  # message_template: Optional[str] = None
+  # Message Config
+  init_messages=...,  # init_messages: List[Message] = Field(default_factory=list)
+  default_message=...,  # default_message: Optional[str] = None
+  message_template=...,  # message_template: Optional[str] = None
 
-    # OpenAI ChatComplemetion Endpoint parameters
-    model=...,  # model: str = 'gpt-3.5-turbo'
-    temperature=...,  # temperature: Optional[float] = None
-    n=...,  # n: Optional[int] = None
-    top_p=...,  # top_p: Optional[float] = None
-    stream=...,  # stream: Optional[bool] = None
-    stop=...,  # stop: Optional[Union[str, List[str]]] = None
-    max_tokens=...,  # max_tokens: Optional[int] = None
-    presence_penalty=...,  # presence_penalty: Optional[float] = None
-    frequency_penalty=...,  # frequency_penalty: Optional[float] = None
-    logit_bias=...,  # logit_bias: Optional[Dict[int, int]] = None
-    user=...,  # user: Optional[str] = None
+  # OpenAI ChatComplemetion Endpoint parameters
+  model=...,  # model: str = 'gpt-3.5-turbo'
+  temperature=...,  # temperature: Optional[float] = None
+  n=...,  # n: Optional[int] = None
+  top_p=...,  # top_p: Optional[float] = None
+  stream=...,  # stream: Optional[bool] = None
+  stop=...,  # stop: Optional[Union[str, List[str]]] = None
+  max_tokens=...,  # max_tokens: Optional[int] = None
+  presence_penalty=...,  # presence_penalty: Optional[float] = None
+  frequency_penalty=...,  # frequency_penalty: Optional[float] = None
+  logit_bias=...,  # logit_bias: Optional[Dict[int, int]] = None
+  user=...,  # user: Optional[str] = None
 )
 ```
 * **name**: optional name of this template.
