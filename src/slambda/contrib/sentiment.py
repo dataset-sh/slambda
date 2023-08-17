@@ -16,7 +16,7 @@ template = Template(
     description="Detect sentiment of the given text",
     temperature=0,
 ).follow_instruction(
-    instruction='Answer positive if premise entail hypothesis, false negative.',
+    instruction='Detect sentiment of the given text, anser positive for positive sentiment otherwise negative.',
     examples=examples,
 )
 
