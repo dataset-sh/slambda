@@ -7,14 +7,19 @@ sidebar_position: 1
 
 ## How to get an API Key
 
+[Here](https://platform.openai.com/account/api-keys)
+
 ## How to load API Key in python
+
+OpenAI also has an article about [Best Practices for API Key Safety
+](https://help.openai.com/en/articles/5112595-best-practices-for-api-key-safety).
 
 ### Load through Env Variable
 
 #### Use `python-dotenv` library
 
 Python-dotenv reads key-value pairs from a .env file and can set them as environment variables. It helps in the
-development of applications following the 12-factor principles.
+development of applications following the [12-factor principles](https://12factor.net/config).
 
 Install python-dotenv
 
