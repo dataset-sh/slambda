@@ -154,12 +154,19 @@ In conclusion, my journey – from electrician to financial analyst, fortified b
 )
 
 generate_essay = TextFunction(t)
-generate_essay(**{
-    "title": " Why I want to apply for master degree in computer science",
-    "work_experience": "actor, bartender",
-    "education_experience": "Bachelor degree in english",
-    "age": 60
-})
+generate_essay(title=" Why I want to apply for master degree in computer science",
+    work_experience = "actor, bartender",
+    education_experience = "Bachelor degree in english",
+    age = 60
+)
+
+# Or: 
+# generate_essay(**{
+#     "title": " Why I want to apply for master degree in computer science",
+#     "work_experience": "actor, bartender",
+#     "education_experience": "Bachelor degree in english",
+#     "age": 60
+# })
 
 """
 As a non-traditional applicant, my decision to pursue a Master's degree in Computer Science stems from a combination
