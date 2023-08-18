@@ -82,7 +82,12 @@ class Example(BaseModel):
         if isinstance(self.input, str):
             return self.input, self.output
         elif isinstance(self.input, dict):
-            return template.message_template.format(**self.input), self.output
+            if TextFunctionMode.KEYWORD not in template.mode:
+                template.mode.append(TextFunctionMode.KEYWORD)
+            if template.message_template is not None:
+                return template.message_template.format(**self.input), self.output
+            else:
+                return "\n".join([f"{k}: {v}" for k, v in self.input.items()]), self.output
 
 
 class Template(BaseModel):
@@ -183,8 +188,8 @@ class Template(BaseModel):
             else:
                 if TextFunctionMode.KEYWORD not in self.mode:
                     raise ValueError('Calling with keyword args is not allowed.')
-                if self.message_template is None:
-                    raise ValueError('Function cannot be called with keyword args, because message_template is None.')
+                # if self.message_template is None:
+                #     raise ValueError('Function cannot be called with keyword args, because message_template is None.')
                 return TextFunctionMode.KEYWORD
         else:
             if kw_count == 0:
@@ -409,7 +414,12 @@ class TextFunction:
             else:
                 messages.append(Message.user(", ".join(args)))
         elif call_mode == TextFunctionMode.KEYWORD:
-            messages.append(Message.user(template.message_template.format(**kwargs)))
+            if template.message_template is not None:
+                msg_text = template.message_template.format(**kwargs)
+                messages.append(Message.user(msg_text))
+            else:
+                msg_text = "\n".join([f"{k}: {v}" for k, v in kwargs.items()])
+                messages.append(Message.user(msg_text))
 
         override_params = ctrl_kws.get('__override', {})
 
