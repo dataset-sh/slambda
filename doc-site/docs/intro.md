@@ -4,7 +4,10 @@ sidebar_position: 1
 ---
 
 # Getting Started
-
+:::tip
+You can enable code block warp in this guide by clicking this button
+![Code Block Warp Button](/img/code-block-wrap-button.png)
+:::
 ## What does slambda do?
 
 We turn instruction and examples into plain python function powered by LLM.
@@ -14,6 +17,7 @@ We turn instruction and examples into plain python function powered by LLM.
 ```bash
 pip install slambda
 ```
+
 
 ## Prerequisite
 

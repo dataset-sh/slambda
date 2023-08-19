@@ -4,7 +4,10 @@ sidebar_position: 2
 ---
 
 # Guide
-
+:::tip
+You can enable code block warp in this guide by clicking this button
+![Code Block Warp Button](/img/code-block-wrap-button.png)
+:::
 ## Concepts
 
 In sLambda, functions are defined by instruction and examples. We create normal python function using only a natural
