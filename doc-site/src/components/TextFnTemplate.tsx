@@ -16,7 +16,7 @@ type Example = {
     output
 }
 
-type TextFunctionMode = 'kw' | 'pos' | 'no_args'
+type TextFunctionMode = 'keyword' | 'pos' | 'no_args'
 type TextFnTemplateType = {
     name?: string
     description?: string
@@ -67,10 +67,10 @@ export function ExeModeBadge({
                                  mode
                              }: { mode: TextFunctionMode }) {
     switch (mode) {
-        case "kw":
+        case "keyword":
             return <Chip label={'Keyword'} sx={{bgcolor: purple[50]}}/>
         case "pos":
-            return <Chip label={'Positional'} sx={{bgcolor: red[50]}}/>
+            return <Chip label={'Unary'} sx={{bgcolor: red[50]}}/>
         case "no_args":
             return <Chip label={'Nullary'} sx={{bgcolor: orange[50]}}/>
     }
