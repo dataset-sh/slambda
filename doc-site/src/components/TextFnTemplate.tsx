@@ -239,9 +239,9 @@ export function MessageView({
             bgcolor: bgColor,
             p: 1,
             borderRadius: 1,
-            width: '80%',
-            minWidth: '30em',
-            textAlign: badgeDirection
+            maxWidth: '80%',
+            textAlign: 'left',
+            whiteSpace: 'pre-line;'
         }}>
             {content}
         </Box>

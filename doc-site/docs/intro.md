@@ -56,13 +56,12 @@ openai.api_key = "sk-ThIsIsAFaKeKEY12345678990...."
 
 We turn instruction and examples into plain python function powered by LLM.
 
-## Start using it
 
-### Define your own functions
+## Define your own functions
 
 `sLambda` can help you turn OpenAI's ChatCompletion api into a extraction, classification, generation api with ease.
 
-#### Extraction
+### Extraction
 
 ```python title="Extract stock Tickers"
 from slambda.core import Example, UnaryFunction, GptApiOptions
@@ -110,7 +109,7 @@ extract_wiki_links(
 # [comparator](https://en.wikipedia.org/wiki/Comparator)
 ```
 
-#### Generation
+### Generation
 
 ```python title="Fix Grammar"
 from slambda.core import Example, UnaryFunction
@@ -184,7 +183,7 @@ generate_essay(
 
 ```
 
-#### Classification
+### Classification
 
 ```python title="Binary sentiment classifier"
 from slambda.core import Example, UnaryFunction, GptApiOptions
@@ -211,7 +210,7 @@ sentiment("The food is pretty, pretty, pretty, pretty good.")
 # Output: positive
 ```
 
-### Use existing functions
+## Use existing functions
 
 ```py
 
@@ -221,7 +220,7 @@ print(sentiment('the food is great!') == 'positive')
 # Output: True
 ```
 
-See [Functions](/docs/category/functions) for existing function implementations.
+See [Functions](/docs/category/builtin-functions) for existing function implementations.
 
 ## Project Status
 

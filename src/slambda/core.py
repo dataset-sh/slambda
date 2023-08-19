@@ -288,8 +288,8 @@ class TextFunction:
 
     definition: Definition
 
-    def __init__(self, template, json_output=False):
-        self.definition = template
+    def __init__(self, definition):
+        self.definition = definition
 
     def __call__(self, *args, **kwargs):
         """
