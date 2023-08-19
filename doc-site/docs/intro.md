@@ -5,6 +5,10 @@ sidebar_position: 1
 
 # Getting Started
 
+## What does slambda do?
+
+We turn instruction and examples into plain python function powered by LLM.
+
 ## Install
 
 ```bash
@@ -51,11 +55,6 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 openai.api_key = "sk-ThIsIsAFaKeKEY12345678990...."
 # But we considered to be a security risk, please read our guide on how to load api key for more details. 
 ```
-
-## What does slambda do?
-
-We turn instruction and examples into plain python function powered by LLM.
-
 
 ## Define your own functions
 
@@ -153,7 +152,7 @@ generate_essay(
     title=" Why I want to apply for master degree in computer science",
     work_experience="actor, bartender",
     education_experience="Bachelor degree in english",
-    age=60 # Yes, you can add more information beyond what is included in the examples. 
+    age=60  # Yes, you can add more information beyond what is included in the examples. 
 )
 
 # Output:
@@ -224,7 +223,8 @@ See [Functions](/docs/category/builtin-functions) for existing function implemen
 
 ## Project Status
 
-The basic functionalities of this package have been reasonably tested (coverage: 100%), and you should have no problem creating your own
+The basic functionalities of this package have been reasonably tested (coverage: 100%), and you should have no problem
+creating your own
 functions.
 
 Function implementations in `slambda.contrib` should have a reasonable output quality. However, since they are powered
