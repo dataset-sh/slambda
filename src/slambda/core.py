@@ -420,7 +420,6 @@ def create_function(
 ):
     t = Definition()
 
-    t.default_message = default_message if default_message is not None else instruction
     t.json_output = json_output
 
     if gpt_opts is not None:
