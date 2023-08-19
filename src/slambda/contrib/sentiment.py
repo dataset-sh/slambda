@@ -1,4 +1,4 @@
-from slambda.core import TextFunction, Template, Example
+from slambda import Example, UnaryFunction, GptApiOptions
 
 examples = [
     Example(
@@ -16,13 +16,8 @@ examples = [
 
 ]
 
-template = Template(
-    name="sentiment",
-    description="Detect sentiment of the given text",
-    temperature=0,
-).follow_instruction(
+sentiment = UnaryFunction.from_instruction(
     instruction='Detect sentiment of the given text, answer positive for positive sentiment, negative for negative sentiment, otherwise neutral.',
     examples=examples,
+    gpt_opts=GptApiOptions(temperature=0)
 )
-
-sentiment = TextFunction(template)

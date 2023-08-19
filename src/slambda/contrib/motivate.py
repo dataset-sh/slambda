@@ -1,4 +1,4 @@
-from slambda.core import TextFunction, Template, Example
+from slambda import NullaryFunction, Example
 
 examples = [
     Example(
@@ -6,13 +6,8 @@ examples = [
     )
 ]
 
-template = Template(
-    name="motivate",
-    description="Generate motivational messages.",
+motivate_me = NullaryFunction.from_instruction(
     default_message="Generate a motivational message.",
-).follow_instruction(
     instruction='Generate motivational messages.',
     examples=examples,
 )
-
-motivate_me = TextFunction(template)

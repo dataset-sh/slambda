@@ -1,4 +1,4 @@
-from slambda.core import TextFunction, Template, Example
+from slambda import KeywordFunction, Example, GptApiOptions
 
 examples = [
     Example(
@@ -9,16 +9,10 @@ examples = [
         output='true'
     )
 ]
-
-template = Template(
-    name="entail",
-    description="",
-    temperature=0,
-    message_template="premise: {premise}\nhypothesis: {hypothesis}",
-    required_args=['premise', 'hypothesis'],
-).follow_instruction(
+ 
+entail = KeywordFunction.from_instruction(
     instruction='Answer true if premise entail hypothesis, false otherwise.',
     examples=examples,
+    message_template="premise: {premise}\nhypothesis: {hypothesis}",
+    gpt_opts=GptApiOptions(temperature=0)
 )
-
-entail = TextFunction(template)

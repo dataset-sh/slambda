@@ -1,4 +1,6 @@
-from dataclasses import dataclass
+import json
+import warnings
+from string import Formatter
 
 import openai
 
@@ -55,7 +57,7 @@ class TextFunctionMode(str, Enum):
     """
     TextFunctionMode control how a text function can be called.
     """
-    KEYWORD = 'kw'
+    KEYWORD = 'keyword'
     """
     KEYWORD allows calling with keyword arguments, e.g. f(a=10)
     """
@@ -71,29 +73,99 @@ class TextFunctionMode(str, Enum):
 
 class Example(BaseModel):
     input: Optional[Union[Dict, str]] = None
-    output: str
+    output: Union[Dict, str] = None
 
     def __init__(self, input=None, output=None, **kwargs):
         super().__init__(input=input, output=output, **kwargs)
 
-    def to_str_pair(self, template: 'Template'):
-        if self.input is None:
-            return template.default_message, self.output
-        if isinstance(self.input, str):
-            return self.input, self.output
-        elif isinstance(self.input, dict):
-            if TextFunctionMode.KEYWORD not in template.mode:
-                template.mode.append(TextFunctionMode.KEYWORD)
-            if template.message_template is not None:
-                return template.message_template.format(**self.input), self.output
+    def to_str_pair(self, definition: 'Definition'):
+        output = self.output
+        if self.is_str_output:
+            output = self.output
+        elif self.is_json_output:
+            output = json.dumps(self.output)
+
+        if self.is_empty_input:
+            return definition.default_message, output
+        if self.is_str_input:
+            return self.input, output
+        elif self.is_dict_input:
+            if TextFunctionMode.KEYWORD not in definition.mode:
+                definition.mode.append(TextFunctionMode.KEYWORD)
+            if definition.message_template is not None:
+                return definition.message_template.format(**self.input), output
             else:
-                return "\n".join([f"{k}: {v}" for k, v in self.input.items()]), self.output
+                return "\n".join([f"{k}: {v}" for k, v in self.input.items()]), output
+
+    @property
+    def is_json_output(self):
+        return isinstance(self.output, dict)
+
+    @property
+    def is_str_output(self):
+        return isinstance(self.output, str)
+
+    @property
+    def is_dict_input(self):
+        return isinstance(self.input, dict)
+
+    @property
+    def is_str_input(self):
+        return isinstance(self.input, str)
+
+    @property
+    def is_empty_input(self):
+        return self.input is None
+
+    def match_call_mode(self, mode_list: List[TextFunctionMode]):
+        if self.is_dict_input:
+            return TextFunctionMode.KEYWORD in mode_list
+        if self.is_str_input:
+            return TextFunctionMode.POS in mode_list
+        if self.is_empty_input:
+            return TextFunctionMode.NO_ARGS in mode_list
+
+    def match_output_mode(self, is_json):
+        if self.is_str_output:
+            return is_json is False
+        if self.is_json_output:
+            return is_json is True
 
 
-class Template(BaseModel):
+class GptApiOptions(BaseModel):
     """
-    Template is an ChatGPT API call template.
-    Check [OpenAI's API reference](https://platform.openai.com/docs/api-reference/chat/create)
+    GptApiOptions used in OpenAI's ChatCompletion API.
+    See [OpenAI's API reference](https://platform.openai.com/docs/api-reference/chat/create)
+
+    Args:
+        model: which model to use, the model must be compatible with [OpenAI's chatCompletion API](https://platform.openai.com/docs/models/model-endpoint-compatibility)
+        temperature: What sampling temperature to use, between 0 and 2. See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
+        n: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
+        top_p: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
+        stream: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
+        stop: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
+        max_tokens: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
+        presence_penalty: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
+        frequency_penalty: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
+        logit_bias: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
+        user: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
+    """
+    model: str = 'gpt-3.5-turbo'
+    temperature: Optional[float] = None
+    n: Optional[int] = None
+    top_p: Optional[float] = None
+    stream: Optional[bool] = None
+    stop: Optional[Union[str, List[str]]] = None
+    max_tokens: Optional[int] = None
+    presence_penalty: Optional[float] = None
+    frequency_penalty: Optional[float] = None
+    logit_bias: Optional[Dict[int, int]] = None
+    user: Optional[str] = None
+
+
+class Definition(BaseModel):
+    """
+    Definition is an ChatGPT API call template.
 
     When executing the call, all message from init_messages will be appended to the message list, and then
         * if no arguments is provided, the default message will be appended to the message list
@@ -109,18 +181,9 @@ class Template(BaseModel):
         default_message: this message will be sent if no args are provided.
         message_template: this message will be rendered with keyword arguments if kwargs are provided.
         required_args: list of required keyword args.
-        examples: call examples
-        model: which model to use, the model must be compatible with [OpenAI's chatCompletion API](https://platform.openai.com/docs/models/model-endpoint-compatibility)
-        temperature: What sampling temperature to use, between 0 and 2. See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
-        n: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
-        top_p: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
-        stream: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
-        stop: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
-        max_tokens: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
-        presence_penalty: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
-        frequency_penalty: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
-        logit_bias: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
-        user: See [OpenAI's API Reference](https://platform.openai.com/docs/api-reference/chat/create)
+        json_output: if output is in json format or string.
+        examples: call examples.
+        gpt_opts: Inference parameters for ChatCompletion API.
     """
     # Template Information
     name: Optional[str] = None
@@ -132,41 +195,12 @@ class Template(BaseModel):
     default_message: Optional[str] = None
     message_template: Optional[str] = None
     required_args: Optional[List[str]] = None
+    json_output: bool = False
+
     examples: List[Example] = Field(default_factory=list)
 
     # OpenAI parameters
-    model: str = 'gpt-3.5-turbo'
-    temperature: Optional[float] = None
-    n: Optional[int] = None
-    top_p: Optional[float] = None
-    stream: Optional[bool] = None
-    stop: Optional[Union[str, List[str]]] = None
-    max_tokens: Optional[int] = None
-    presence_penalty: Optional[float] = None
-    frequency_penalty: Optional[float] = None
-    logit_bias: Optional[Dict[int, int]] = None
-    user: Optional[str] = None
-
-    def model_post_init(self, __context):
-        """
-        Auto adjust available modes if not provided.
-        :param __context:
-        :return:
-        """
-        if self.mode is None or len(self.mode) == 0:
-            self.mode = []
-            if self.default_message is not None:
-                self.mode.append(TextFunctionMode.NO_ARGS)
-            if self.message_template is not None:
-                self.mode.append(TextFunctionMode.KEYWORD)
-            if len(self.mode) == 0:
-                self.mode.append(TextFunctionMode.POS)
-
-        if self.required_args is not None and len(self.required_args) > 0:
-            if len(self.mode) != 1 and TextFunctionMode.KEYWORD not in self.mode:
-                raise Warning('required_args is provided, self.mode will be set to [TextFunctionMode.KEYWORD] '
-                              'and default_message will be ignored')
-                self.mode = [TextFunctionMode.KEYWORD]
+    gpt_opts: GptApiOptions = Field(default_factory=GptApiOptions)
 
     def find_call_mode(self, *args, **kwargs) -> TextFunctionMode:
         """
@@ -188,8 +222,8 @@ class Template(BaseModel):
             else:
                 if TextFunctionMode.KEYWORD not in self.mode:
                     raise ValueError('Calling with keyword args is not allowed.')
-                # if self.message_template is None:
-                #     raise ValueError('Function cannot be called with keyword args, because message_template is None.')
+                # We don't need to check if message template is none, if template is missing, we will simply print one
+                # kv pair per line.
                 return TextFunctionMode.KEYWORD
         else:
             if kw_count == 0:
@@ -199,7 +233,7 @@ class Template(BaseModel):
             else:
                 raise ValueError('Function is called with both positional and keyword args.')
 
-    def follow_instruction(self, instruction, examples: Optional[List[Example]] = None):
+    def from_instruction(self, instruction, examples: Optional[List[Example]] = None):
         """
         Using instruction and examples to create init_messages list.
         Instruction will be loaded into the first system message, and each input/output in examples list will be
@@ -227,102 +261,15 @@ class Template(BaseModel):
 
         return self
 
-
-builtin_templates = [
-    Template(
-        name="generate_idea",
-        messages=[
-            Message.system('You are a assistant that create random slideshow topic idea'),
-            Message.example_user('Generate random lecture topic'),
-            Message.example_assistant('How to build a landing page')
-        ],
-        default_message='Generate random lecture topic',
-        temperature=1.8
-    ),
-    Template(
-        name="generate_slide",
-        message_template="Title: {title}\nPage Count: {page_count}",
-        messages=[
-            Message.system('You are a assistant that create a list of slide given a lecture topic in markdown format'),
-            Message.example_user('Title: How to build a landing page\nPage Count: 5'),
-            Message.example_assistant('''
-{
- "slides": [
-  {
-   "title": "Introduction",
-   "bulletPoints": [
-    "Importance of a landing page for startups",
-    "Purpose of a landing page"
-   ]
-  },
-  {
-   "title": "Defining Your Goal",
-   "bulletPoints": [
-    "Identify the main objective of your landing page",
-    "Choose a specific call-to-action (CTA) to drive conversions",
-    "Set measurable goals to track success"
-   ]
-  },
-  {
-   "title": "Compelling Content",
-   "bulletPoints": [
-    "Craft a captivating headline",
-    "Write clear and concise copy",
-    "Highlight the unique value proposition",
-    "Include persuasive testimonials or case studies",
-    "Use compelling visuals and videos"
-   ]
-  },
-  {
-   "title": "Effective CTA",
-   "bulletPoints": [
-    "Place the CTA prominently on the page",
-    "Make the CTA visually appealing and action-oriented",
-    "Use persuasive language in the CTA copy",
-    "Ensure the CTA stands out from the rest of the page"
-   ]
-  },
-  {
-   "title": "Conclusion",
-   "bulletPoints": [
-    "Summarize key points",
-    "Encourage visitors to take action"
-   ]
-  }
- ]
-}
-'''.strip())
-        ],
-    ),
-    Template(
-        name="generate_narration",
-        messages=[
-            Message.system('You are a assistant that create a script for instructor given a lecture slide'),
-            Message.example_user("""
-Topic: How to build a landing page
-Title: Best Practices for Landing Page Creation
-* Mobile Responsiveness - Ensure your landing page is mobile-friendly.
-* Minimize Form Fields - Keep the form fields minimal to reduce friction.
-* Engaging Copy - Use persuasive language and storytelling to captivate visitors.
-* Trust Elements - Include testimonials, reviews, and trust symbols to build credibility.
-            """.strip()),
-            Message.example_assistant("""
-Hello, everyone! We've covered some essential aspects of building an effective landing page for your startup, and now we'll dive into the best practices that can significantly enhance your landing page's performance. These practices will help you create landing pages that engage visitors and drive conversions. So, let's get started with the best practices for landing page creation.
-The first practice we'll discuss is Mobile Responsiveness. It's crucial to ensure that your landing page is mobile-friendly. With an increasing number of users accessing websites from their mobile devices, a responsive landing page provides a seamless experience, boosting engagement and conversions.
-Moving on, we have Minimize Form Fields. It's essential to keep the form fields minimal on your landing page. Lengthy forms can create friction and deter potential leads. By asking for only essential information, you make it easier for visitors to engage with your CTA and increase the chances of form completions.
-Lastly, we have Trust Elements. Building credibility is crucial for gaining your visitors' trust. Include elements such as testimonials, reviews, and trust symbols to showcase the positive experiences of previous customers and reinforce the reliability of your product or service.
-To sum up, incorporating these best practices into your landing page creation process will help you create high-performing, engaging, and conversion-driven landing pages. Remember, landing pages are powerful tools for connecting with your audience and achieving your startup's goals.
-            """.strip())
-        ],
-    )
-]
+    def fn(self) -> 'TextFunction':
+        return TextFunction(self)
 
 
 class TextFunction:
-    RESERVED_KEYWORDS = ['return_dict', 'extra_messages', '__override']
+    RESERVED_KEYWORDS = ['return_json', 'extra_messages', '__override', 'return_resp_obj']
     """
     RESERVED_KEYWORDS: reserved keywords:
-    return_dict: if set to true, the response from ChatCompletion API will be returned directly
+    return_json: parse output as json.
     extra_messages: extra messages to be carried over, it will be appended after init_messages from template but 
                     before the final message
     __override: any parameters to be override, currently you can override the following:
@@ -336,44 +283,15 @@ class TextFunction:
                     * logit_bias
                     * user
                 (see here for details)[https://platform.openai.com/docs/api-reference/chat/create]
+    return_resp_obj: if set to true, the response from ChatCompletion API will be returned directly                
     """
 
-    template: Template
+    definition: Definition
 
-    def __init__(self, template):
-        self.template = template
+    def __init__(self, template, json_output=False):
+        self.definition = template
 
     def __call__(self, *args, **kwargs):
-        """
-        Executing function call
-        :param args:
-        :param kwargs:
-        :return:
-        """
-        return TextFunction._handle_call(self.template, *args, **kwargs)
-
-    @staticmethod
-    def wrap(template):
-        """
-        Return a decorator function that be used to construct a TextFunction.
-        ```py
-        @TextFunction.wrap(Template(...))
-        def my_text_func():
-            # function body will be discarded
-            pass
-        ```
-
-        :param template: the template
-        :return: a decorator function that be used to construct a TextFunction
-        """
-
-        def decorator(func):
-            return TextFunction(template)
-
-        return decorator
-
-    @staticmethod
-    def _handle_call(template, *args, **kwargs):
         """
         Execute the function call based on the provided template
 
@@ -382,6 +300,7 @@ class TextFunction:
         :param kwargs:
         :return:
         """
+        template = self.definition
         all_kwargs = kwargs
         kwargs = {}
         ctrl_kws = {}
@@ -401,7 +320,8 @@ class TextFunction:
         ]
 
         for m in ctrl_kws.get('extra_messages', []):
-            assert isinstance(m, Message), 'message in extra_messages must be an instance of slambda.Message'
+            if not isinstance(m, Message):
+                raise ValueError('message in extra_messages must be an instance of slambda.Message')
             messages.append(m)
 
         call_mode = template.find_call_mode(*args, **kwargs)
@@ -412,7 +332,7 @@ class TextFunction:
             if len(args) == 1:
                 messages.append(Message.user(args[0]))
             else:
-                messages.append(Message.user(", ".join(args)))
+                raise ValueError(f'Multiple positional arguments are provided')
         elif call_mode == TextFunctionMode.KEYWORD:
             if template.message_template is not None:
                 msg_text = template.message_template.format(**kwargs)
@@ -423,17 +343,17 @@ class TextFunction:
 
         override_params = ctrl_kws.get('__override', {})
 
-        model = override_params.get('model', template.model)
-        n = override_params.get('n', template.n)
-        temperature = override_params.get('temperature', template.temperature)
-        top_p = override_params.get('top_p', template.top_p)
-        stream = override_params.get('stream', template.stream)
-        stop = override_params.get('stop', template.stop)
-        max_tokens = override_params.get('max_tokens', template.max_tokens)
-        presence_penalty = override_params.get('presence_penalty', template.presence_penalty)
-        frequency_penalty = override_params.get('frequency_penalty', template.frequency_penalty)
-        logit_bias = override_params.get('logit_bias', template.logit_bias)
-        user = override_params.get('user', template.user)
+        model = override_params.get('model', template.gpt_opts.model)
+        n = override_params.get('n', template.gpt_opts.n)
+        temperature = override_params.get('temperature', template.gpt_opts.temperature)
+        top_p = override_params.get('top_p', template.gpt_opts.top_p)
+        stream = override_params.get('stream', template.gpt_opts.stream)
+        stop = override_params.get('stop', template.gpt_opts.stop)
+        max_tokens = override_params.get('max_tokens', template.gpt_opts.max_tokens)
+        presence_penalty = override_params.get('presence_penalty', template.gpt_opts.presence_penalty)
+        frequency_penalty = override_params.get('frequency_penalty', template.gpt_opts.frequency_penalty)
+        logit_bias = override_params.get('logit_bias', template.gpt_opts.logit_bias)
+        user = override_params.get('user', template.gpt_opts.user)
 
         call_args_dict = dict(
             messages=[
@@ -455,13 +375,182 @@ class TextFunction:
         call_args_dict = {k: v for k, v in call_args_dict.items() if v is not None}
         resp = openai.ChatCompletion.create(**call_args_dict)
 
-        return_dict = ctrl_kws.get('return_dict', False) or stream is True
-
-        if return_dict:
+        return_resp_obj = ctrl_kws.get('return_resp_obj', False) or stream is True
+        if return_resp_obj:
             return resp
 
         if n is None or n == 1:
             ret = resp['choices'][0]['message']['content']
-            return ret
+            if self.definition.json_output and ctrl_kws.get('return_json', True):
+                ret = try_parse_json(ret)
+                return ret
+            else:
+                return ret
         else:
-            return [c['message']['content'] for c in resp['choices']]
+            if self.definition.json_output and ctrl_kws.get('return_json', True):
+                return [try_parse_json(c['message']['content']) for c in resp['choices']]
+            else:
+                return [c['message']['content'] for c in resp['choices']]
+
+
+def try_parse_json(js):
+    try:
+        dict_ret = json.loads(js)
+        return dict_ret
+    except ValueError as e:
+        warnings.warn(f"Cannot parse output as json: \n{js}")
+        return js
+
+
+def create_function(
+        instruction: str,
+        examples: Optional[List[Example]] = None,
+        gpt_opts: Optional[GptApiOptions] = None,
+
+        allow_no_arg: bool = False,
+        default_message: Optional[str] = None,
+
+        allow_pos: bool = False,
+
+        allow_keyword: bool = False,
+        message_template: Optional[str] = None,
+        required_args: Optional[List[str]] = None,
+
+        json_output=None,
+):
+    t = Definition()
+
+    t.default_message = default_message if default_message is not None else instruction
+    t.json_output = json_output
+
+    if gpt_opts is not None:
+        t.gpt_opts = gpt_opts
+
+    if allow_no_arg:
+        t.default_message = default_message if default_message is not None else instruction
+        t.mode.append(TextFunctionMode.NO_ARGS)
+
+    if allow_keyword and allow_pos:
+        raise ValueError('allow_keyword and allow_pos cannot both be true')
+
+    if True not in [allow_no_arg, allow_keyword, allow_pos]:
+        raise ValueError('at least one of allow_no_arg, allow_keyword, allow_pos must be true')
+
+    if allow_pos:
+        t.mode.append(TextFunctionMode.POS)
+
+    if allow_keyword:
+        t.message_template = message_template
+        t.required_args = required_args
+        if message_template is not None:
+            if t.required_args is None:
+                t.required_args = extract_required_keywords(message_template)
+        t.mode.append(TextFunctionMode.KEYWORD)
+
+    t.from_instruction(instruction, examples)
+    json_output = inspect_examples(examples, t.mode, json_output)
+    t.json_output = json_output
+    return t.fn()
+
+
+def inspect_examples(examples: Optional[List[Example]], mode_list: List[TextFunctionMode], json_output=None):
+    json_output_provided = json_output is not None
+    if len(mode_list) == 0:
+        raise ValueError('Call mode list is empty')
+
+    if examples is None:
+        return json_output
+
+    for example in examples:
+        if not example.match_call_mode(mode_list):
+            raise ValueError(f'Example cannot be used in call mode [{", ".join(mode_list)}]')
+
+        if json_output is None:
+            json_output = example.is_json_output
+        else:
+            if not example.match_output_mode(json_output):
+                if json_output_provided:
+                    if json_output:
+                        raise ValueError('Example output is str, but dict(json)')
+                    else:
+                        raise ValueError('Example output is dict(json), but string is expected')
+                else:
+                    raise ValueError('Example output has a mixed list of string and dict.')
+
+    return json_output
+
+
+class NullaryFunction:
+    @staticmethod
+    def from_instruction(
+            instruction: str,
+            examples: Optional[List[Example]] = None,
+            gpt_opts: Optional[GptApiOptions] = None,
+
+            default_message: Optional[str] = None,
+
+            json_output=None,
+    ):
+        return create_function(
+            instruction, examples,
+            gpt_opts=gpt_opts,
+            default_message=default_message,
+            json_output=json_output,
+            allow_no_arg=True,
+        )
+
+
+class UnaryFunction:
+    @staticmethod
+    def from_instruction(
+            instruction: str,
+            examples: Optional[List[Example]] = None,
+            gpt_opts: Optional[GptApiOptions] = None,
+
+            allow_no_arg: bool = False,
+            default_message: Optional[str] = None,
+
+            json_output=None,
+    ):
+        return create_function(
+            instruction, examples,
+            gpt_opts=gpt_opts,
+            default_message=default_message,
+            json_output=json_output,
+            allow_no_arg=allow_no_arg,
+            allow_pos=True,
+        )
+
+
+class KeywordFunction:
+    @staticmethod
+    def from_instruction(
+            instruction: str,
+            examples: Optional[List[Example]] = None,
+            gpt_opts: Optional[GptApiOptions] = None,
+
+            message_template: Optional[str] = None,
+
+            allow_no_arg: bool = False,
+            default_message: Optional[str] = None,
+
+            json_output=None,
+    ):
+        return create_function(
+            instruction, examples,
+            gpt_opts=gpt_opts,
+            default_message=default_message,
+            json_output=json_output,
+            allow_no_arg=allow_no_arg,
+            message_template=message_template,
+            allow_keyword=True,
+        )
+
+
+def extract_required_keywords(template_str):
+    """
+    Extract named keywords from a string template.
+    :param template_str: string template
+    :return: list of named keywords
+    """
+    return [fn for _, fn, _, _ in Formatter().parse(template_str) if fn is not None]

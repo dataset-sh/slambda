@@ -7,7 +7,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
     title: 'sλ',
-    tagline: "zero/one/few shot prompting, with a touch of simplicity",
+    tagline: "instruction is function",
     favicon: 'img/favicon.ico',
 
     // Set the production url of your site here

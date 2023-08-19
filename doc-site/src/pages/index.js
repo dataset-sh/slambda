@@ -31,7 +31,7 @@ export default function Home() {
           alignItems: "center",
           pt: {
             xs: 6,
-            md: 50
+            md: 20
           },
           px: {
             xs: 6,

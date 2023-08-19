@@ -1,8 +1,10 @@
+import json
 import unittest
 from unittest import TestCase
 import unittest.mock as mock
 
-from src.slambda.core import Template, TextFunction, TextFunctionMode, Message, Role, Example
+from src.slambda.core import Definition, TextFunction, TextFunctionMode, Message, Role, Example, \
+    extract_required_keywords, try_parse_json
 
 
 def side_effect_function(**kwargs):
@@ -32,23 +34,97 @@ def side_effect_function(**kwargs):
         return dict(choices=choices)
 
 
+def side_effect_json_function(**kwargs):
+    # You can define your custom logic here based on kwargs
+    # This is a simple example which returns different text based on the model
+    if kwargs.get('n', 1) == 1:
+        return {
+            'choices': [
+                {
+                    'message': {
+                        'content': json.dumps({'k': 0})
+                    }
+                }
+            ]
+        }
+    else:
+        choices = []
+        for i in range(kwargs['n']):
+            choices.append(
+                {
+                    'message': {
+                        'content': json.dumps({'k': i})
+                    }
+                }
+            )
+
+        return dict(choices=choices)
+
+
 def create_fake_response(i):
     return f"MODEL OUTPUT #{i}"
 
 
 class TestTextFunction(TestCase):
+    @mock.patch('openai.ChatCompletion.create')
+    def test_missing_kws(self, mock_openai_api):
+        mock_openai_api.side_effect = side_effect_function
+        fd = Definition(
+            messages=list(),
+            mode=[TextFunctionMode.KEYWORD],
+            required_args=['age', 'name']
+        )
+
+        f = fd.fn()
+        f(age=12, name='jack')
+        f(age=12, name='jack', msg='hello')
+        with self.assertRaises(ValueError) as context:
+            f('')
+        with self.assertRaises(ValueError) as context:
+            f(age='')
+
+    @mock.patch('openai.ChatCompletion.create')
+    def test_str_message(self, mock_openai_api):
+        mock_openai_api.side_effect = side_effect_function
+        fd = Definition(
+            messages=list(),
+            mode=[TextFunctionMode.POS],
+        )
+
+        f = fd.fn()
+
+        with self.assertRaises(ValueError) as context:
+            f('', extra_messages=['hello'])
+
+        f('', extra_messages=[Message.system('123')])
+
+    @mock.patch('openai.ChatCompletion.create')
+    def test_multiple_pos_args(self, mock_openai_api):
+        mock_openai_api.side_effect = side_effect_function
+        fd = Definition(
+            messages=list(),
+            mode=[TextFunctionMode.POS],
+        )
+
+        f = fd.fn()
+
+        with self.assertRaises(ValueError) as context:
+            f('', '123')
+
+        f('')
 
     @mock.patch('openai.ChatCompletion.create')
     def test_fun_no_args(self, mock_openai_api):
         mock_openai_api.side_effect = side_effect_function
 
-        f = TextFunction(Template(
+        f = TextFunction(Definition(
             init_messages=[
                 Message.system('A system message')
             ],
-            default_message='this receive no arg'
-
+            default_message='this receive no arg',
+            mode=[TextFunctionMode.NO_ARGS]
         ))
+
         out = f()
         self.assertEqual('ONLY MODEL OUTPUT', out)
 
@@ -77,11 +153,34 @@ class TestTextFunction(TestCase):
             n=5
         ), mock_openai_api.call_args_list[1].kwargs)
 
+        out = f(return_resp_obj=True)
+        self.assertEqual(dict(choices=[
+            {
+                'message': {
+                    'content': f"ONLY MODEL OUTPUT"
+                }
+            }
+        ]), out)
+
+        out = f(return_resp_obj=True, __override={"n": 2})
+        self.assertEqual(dict(choices=[
+            {
+                'message': {
+                    'content': "MODEL OUTPUT #0"
+                }
+            },
+            {
+                'message': {
+                    'content': "MODEL OUTPUT #1"
+                }
+            }
+        ]), out)
+
     @mock.patch('openai.ChatCompletion.create')
     def test_fun_pos_arg(self, mock_openai_api):
         mock_openai_api.side_effect = side_effect_function
 
-        f = TextFunction(Template(
+        f = TextFunction(Definition(
             init_messages=[
                 Message.system('A system message')
             ],
@@ -105,11 +204,12 @@ class TestTextFunction(TestCase):
     @mock.patch('openai.ChatCompletion.create')
     def test_fun_kwargs(self, mock_openai_api):
         mock_openai_api.side_effect = side_effect_function
-        f = TextFunction(Template(
+        f = TextFunction(Definition(
             init_messages=[
                 Message.system('A system message')
             ],
-            message_template='arg 1: {name}, arg 2: {age}'
+            message_template='arg 1: {name}, arg 2: {age}',
+            mode=[TextFunctionMode.KEYWORD]
         ))
         f(name='Apple', age=10)
 
@@ -125,25 +225,44 @@ class TestTextFunction(TestCase):
         ), mock_openai_api.call_args_list[0].kwargs)
 
     @mock.patch('openai.ChatCompletion.create')
-    def test_decorator(self, mock_openai_api):
+    def test_json_out(self, mock_openai_api):
+        mock_openai_api.side_effect = side_effect_json_function
+        f = TextFunction(Definition(
+            mode=[TextFunctionMode.POS],
+            json_output=True
+        ))
+
+        self.assertTrue(f.definition.json_output)
+
+        out = f('hello')
+        self.assertDictEqual({'k': 0}, out)
+
+        out = f('hello', __override={"n": 2})
+        self.assertListEqual([
+            {'k': 0},
+            {'k': 1}
+        ], out)
+
+    @mock.patch('openai.ChatCompletion.create')
+    def test_json_out_failed(self, mock_openai_api):
         mock_openai_api.side_effect = side_effect_function
+        f = TextFunction(Definition(
+            mode=[TextFunctionMode.POS],
+            json_output=True
+        ))
 
-        t = Template(
-            default_message='receives no arg',
-        )
+        self.assertTrue(f.definition.json_output)
 
-        @TextFunction.wrap(t)
-        def f():
-            pass
-
-        f2 = TextFunction(t)
-        self.assertEqual(f(), f2())
+        with self.assertWarns(UserWarning) as context:
+            out = f('hello')
+            self.assertEqual('ONLY MODEL OUTPUT', out)
 
 
-class TestTemplate(TestCase):
+class TestDefinition(TestCase):
     def test_model_post_init_no_arg(self):
-        t = Template(
-            default_message='this receive no arg'
+        t = Definition(
+            default_message='this receive no arg',
+            mode=[TextFunctionMode.NO_ARGS]
         )
 
         self.assertIn(TextFunctionMode.NO_ARGS, t.mode)
@@ -164,8 +283,9 @@ class TestTemplate(TestCase):
         self.assertEqual('Function is called with both positional and keyword args.', str(context.exception))
 
     def test_model_post_init_pos(self):
-        t = Template(
-            messages=list()
+        t = Definition(
+            messages=list(),
+            mode=[TextFunctionMode.POS]
         )
         self.assertIn(TextFunctionMode.POS, t.mode)
         self.assertEqual(1, len(t.mode))
@@ -185,8 +305,9 @@ class TestTemplate(TestCase):
         self.assertEqual('Function is called with both positional and keyword args.', str(context.exception))
 
     def test_model_post_init_kw(self):
-        t = Template(
-            message_template='arg 1: {name}, arg 2: {age}'
+        t = Definition(
+            message_template='arg 1: {name}, arg 2: {age}',
+            mode=[TextFunctionMode.KEYWORD]
         )
 
         self.assertIn(TextFunctionMode.KEYWORD, t.mode)
@@ -207,9 +328,10 @@ class TestTemplate(TestCase):
         self.assertEqual('Function is called with both positional and keyword args.', str(context.exception))
 
     def test_model_post_init_mix(self):
-        t = Template(
+        t = Definition(
             default_message='this receive no arg',
-            message_template='arg 1: {name}, arg 2: {age}'
+            message_template='arg 1: {name}, arg 2: {age}',
+            mode=[TextFunctionMode.NO_ARGS, TextFunctionMode.KEYWORD]
         )
 
         self.assertIn(TextFunctionMode.NO_ARGS, t.mode)
@@ -229,7 +351,7 @@ class TestTemplate(TestCase):
 
     def test_model_post_init_missing_default(self):
         with self.assertRaises(ValueError) as context:
-            Template(
+            Definition(
                 mode=[TextFunctionMode.NO_ARGS]
             ).find_call_mode()
 
@@ -239,13 +361,15 @@ class TestTemplate(TestCase):
         self.assertNotEqual(
             'Function because default_message is None.', str(context.exception))
 
-    def test_model_post_init_missing_template(self):
-        with self.assertRaises(ValueError) as context:
-            Template(
-                mode=[TextFunctionMode.KEYWORD]
-            ).find_call_mode(a=10)
-        self.assertEqual(
-            'Function cannot be called with keyword args, because message_template is None.', str(context.exception))
+    def test_fn(self):
+        fd = Definition(
+            messages=list(),
+            mode=[TextFunctionMode.POS]
+        )
+
+        f = fd.fn()
+        f1 = TextFunction(fd)
+        self.assertEqual(f1.definition, f.definition)
 
 
 class TestMessage(TestCase):
@@ -278,75 +402,15 @@ class TestMessage(TestCase):
         self.assertEqual(expected, Message.example_assistant(content))
 
 
+class TestUtils(TestCase):
+    def test_extract_required_keywords(self):
+        ns = extract_required_keywords('{name} is {age} years old.')
+        self.assertListEqual(['name', 'age'], ns)
+
+    def test_try_parse_json(self):
+        d = try_parse_json('{"k": 0}')
+        self.assertDictEqual({"k": 0}, d)
+
+
 if __name__ == '__main__':
     unittest.main()
-
-
-class TestTemplate(TestCase):
-    def test_shortcut_constructor(self):
-        self.assertEqual(
-            Message.system(content='A system message'),
-            Message(role='system', content='A system message')
-        )
-
-        self.assertEqual(
-            Message.user(content='A user message'),
-            Message(role='user', content='A user message')
-        )
-
-        self.assertEqual(
-            Message.assistant(content='A assistant message'),
-            Message(role='assistant', content='A assistant message')
-        )
-
-        self.assertEqual(
-            Message.example_user(content='A system message'),
-            Message(role='system', content='A system message', name='example_user')
-        )
-
-        self.assertEqual(
-            Message.example_assistant(content='A system message'),
-            Message(role='system', content='A system message', name='example_assistant')
-        )
-
-    def test_follow_instruction(self):
-        self.maxDiff = None
-        t = Template(
-            init_messages=[
-                Message.system('A system message')
-            ],
-            default_message='this receive no arg'
-        )
-
-        self.assertListEqual(
-            [Message(role='system', content='A system message')],
-            t.init_messages
-        )
-
-        t.follow_instruction(
-            'this is a instruction'
-        )
-
-        self.assertListEqual(
-            [Message(role='system', content='this is a instruction')],
-            t.init_messages
-        )
-
-        examples = [
-            Example(f"i-{i}", f"o-{i}") for i in range(2)
-        ]
-
-        t.follow_instruction(
-            'this is the 2nd instruction', examples
-        )
-
-        self.assertListEqual(
-            [
-                Message(role='system', content='this is the 2nd instruction'),
-                Message(role='system', content='i-0', name='example_user'),
-                Message(role='system', content='o-0', name='example_assistant'),
-                Message(role='system', content='i-1', name='example_user'),
-                Message(role='system', content='o-1', name='example_assistant'),
-            ],
-            t.init_messages
-        )

@@ -40,14 +40,14 @@ def list_functions(doc_base=DOC_BASE):
         }
 
         if '.' in fn:
-            base_name, func_name = fn.split('.')
-            json_base = os.path.join(doc_base, 'src', 'data', base_name)
+            base_module_name, func_name = fn.split('.')
+            json_base = os.path.join(doc_base, 'src', 'data', base_module_name)
             os.makedirs(json_base, exist_ok=True)
-            json_path = os.path.join(doc_base, 'src', 'data', base_name, f"{func_name}.json")
-            doc_base = os.path.join(doc_base, 'docs', 'functions', base_name)
-            doc_path = os.path.join(doc_base, 'docs', 'functions', base_name, f"{func_name}.mdx")
-            ensure_doc_parent_exists(doc_base)
-            ensure_doc_exists(doc_path, name=func_name, path=f"{base_name}/{func_name}")
+            json_path = os.path.join(doc_base, 'src', 'data', base_module_name, f"{func_name}.json")
+            module_base = os.path.join(doc_base, 'docs', 'functions', base_module_name)
+            doc_path = os.path.join(doc_base, 'docs', 'functions', base_module_name, f"{func_name}.mdx")
+            ensure_doc_parent_exists(module_base, base_module_name)
+            ensure_doc_exists(doc_path, name=func_name, path=f"{base_module_name}/{func_name}")
         else:
             func_name = fn
             json_path = os.path.join(doc_base, 'src', 'data', f"{func_name}.json")
@@ -85,7 +85,7 @@ def ensure_doc_exists(doc_path, name, path):
             out.write(DOC_TEMPLATE.format(name=name, path=path))
 
 
-def ensure_doc_parent_exists(doc_base):
+def ensure_doc_parent_exists(doc_base, base_module_name):
     if os.path.exists(doc_base) and os.path.isdir(doc_base):
         return
     else:
@@ -93,7 +93,7 @@ def ensure_doc_parent_exists(doc_base):
         cat_json_path = os.path.join(doc_base, '_category_.json')
         with open(cat_json_path, 'w') as out:
             json.dump({
-                "label": f"{doc_base}",
+                "label": f"{base_module_name}",
                 "link": {
                     "type": "generated-index"
                 }
@@ -108,7 +108,7 @@ def get_function(name):
         if isinstance(item, TextFunction):
             fns.append({
                 "name": item_name,
-                "template": item.template.model_dump(mode='json', exclude_none=True)
+                "template": item.definition.model_dump(mode='json', exclude_none=True)
             })
     return fns
 
