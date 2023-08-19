@@ -8,7 +8,7 @@ sidebar_position: 4
 ```python
 class Role(str, Enum):
     """
-    Role for chat message
+    Role for chat message.
     https://platform.openai.com/docs/api-reference/chat/create#chat/create-role
     """
     system = 'system'
@@ -19,7 +19,7 @@ class Role(str, Enum):
 
 ```python
 class Message(BaseModel):
-    """Chat Model Message
+    """Chat Model Message.
 
     Args:
         role: (Role for chat message)[https://platform.openai.com/docs/api-reference/chat/create#chat/create-role]
@@ -38,15 +38,15 @@ class TextFunctionMode(str, Enum):
     """
     KEYWORD = 'keyword'
     """
-    KEYWORD allows calling with keyword arguments, e.g. f(a=10)
+    KEYWORD allows calling with keyword arguments, e.g. f(a=10).
     """
     POS = 'pos'
     """
-    POS allows calling with positional arguments, e.g. f(10)
+    POS allows calling with positional arguments, e.g. f(10).
     """
     NO_ARGS = 'no_args'
     """
-    NO_ARGS allows calling with no arguments, e.g. f()
+    NO_ARGS allows calling with no arguments, e.g. f().
     """
 ```
 
@@ -62,7 +62,7 @@ class Example(BaseModel):
     * For unary function, the `input` field should be `string`. If `allow_no_arg` is `True`, it can also be `None`.
     * For keyword function, the `input` field should be `dict`. If `allow_no_arg` is `True`, it can also be `None`.
 
-    If input is a dict, all value in input.values() must be able to render as a string with f-string i.e. `f"{value}"`
+    If input is a dict, all value in input.values() must be able to render as a string with f-string i.e. `f"{value}"`.
 
     Args:
         input: `None`, a `str` value, or a `dict` object.
@@ -111,9 +111,8 @@ class Definition(BaseModel):
 
     When executing the call, all message from init_messages will be appended to the message list, and then
         * if no arguments is provided, the default message will be appended to the message list
-        * if positional arguments is provided, all the positional arguments will be appended to the message list
-            if multiple positional arguments are provided, they will be joined by a comma.
-        * if keyword arguments is provided, message_template will be rendered and appended to the message list
+        * if positional argument is provided, all the positional arguments will be appended to the message list
+        * if keyword arguments is provided, message_template will be rendered and appended to the message list.
 
     Args:
         name: optional name of this template.
@@ -149,7 +148,7 @@ class Definition(BaseModel):
 class TextFunction:
     """
     A text function that call be called, the preferred way to create such function is using one of
-    `NullaryFunction`, `UnaryFunction`, `KeywordFunction`,
+    `NullaryFunction`, `UnaryFunction`, `KeywordFunction`.
     """
 
     RESERVED_KEYWORDS = ['return_json', 'extra_messages', '__override', 'return_resp_obj']
@@ -237,6 +236,7 @@ class NullaryFunction:
             json_output=None,
     ):
         """
+        Create a nullary function.
 
         :param instruction: Describe what the function should do.
         :param examples: Input/Output examples.
@@ -270,7 +270,7 @@ class UnaryFunction:
             json_output=None,
     ):
         """
-        Create a Unary Function
+        Create a unary function.
         :param instruction: Describe what the function should do.
         :param examples: Input/Output examples.
         :param gpt_opts: Optional `GptApiOptions` to override the default inference parameters.
