@@ -1,6 +1,6 @@
-from slambda.core import Example, UnaryFunction
+from slambda.core import Example, KeywordFunction
 
-generate_essay = UnaryFunction.from_instruction(
+generate_essay = KeywordFunction.from_instruction(
     instruction="Write an grad school application essay about 250 words using the given information",
     examples=[
         Example({
