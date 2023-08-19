@@ -113,10 +113,10 @@ const config = {
                     {
                         title: 'Community',
                         items: [
-                            // {
-                            //     label: 'Stack Overflow',
-                            //     href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-                            // },
+                            {
+                                label: 'Discussion',
+                                href: 'https://github.com/dataset-sh/slambda/discussions',
+                            },
                             // {
                             //     label: 'Discord',
                             //     href: 'https://discordapp.com/invite/docusaurus',
