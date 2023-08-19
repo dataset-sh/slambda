@@ -3,7 +3,7 @@ import unittest
 from unittest import TestCase
 import unittest.mock as mock
 
-from src.slambda.core import Definition, TextFunction, TextFunctionMode, Message, Role, Example, \
+from slambda.core import Definition, TextFunction, TextFunctionMode, Message, Role, Example, \
     extract_required_keywords, try_parse_json
 
 
