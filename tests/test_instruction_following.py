@@ -236,6 +236,8 @@ class TestInspectExamples(unittest.TestCase):
 
 class TestNullaryFunction(unittest.TestCase):
     def test_by_instruction_and_examples(self):
+        with self.assertRaises(ValueError):
+            NullaryFunction()
         f = NullaryFunction.from_instruction(
             'do this',
             examples=[
@@ -256,6 +258,9 @@ class TestNullaryFunction(unittest.TestCase):
 
 class TestUnaryFunction(unittest.TestCase):
     def test_creation(self):
+        with self.assertRaises(ValueError):
+            UnaryFunction()
+
         f = UnaryFunction.from_instruction(
             'do this',
             examples=[
@@ -276,6 +281,9 @@ class TestUnaryFunction(unittest.TestCase):
 
 class TestKeywordFunction(unittest.TestCase):
     def test_creation(self):
+        with self.assertRaises(ValueError):
+            KeywordFunction()
+
         f = KeywordFunction.from_instruction(
             'do this',
             examples=[
