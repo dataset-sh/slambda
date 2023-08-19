@@ -16,6 +16,8 @@ const config = {
     // For GitHub pages deployment, it is often '/<projectName>/'
     baseUrl: '/',
 
+    scripts: [{src: 'https://plausible.io/js/script.js', defer: true, 'data-domain': 'slambda.dataset.sh'}],
+
     // GitHub pages deployment config.
     // If you aren't using GitHub pages, you don't need these.
     organizationName: 'dataset.sh', // Usually your GitHub org/user name.
