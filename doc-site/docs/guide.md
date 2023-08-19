@@ -177,6 +177,8 @@ The `output` field of `Example` can be either a `str` value, or a `dict` object.
 * For unary function, the `input` field should be `string`. If `allow_no_arg` is `True`, it can also be `None`.
 * For keyword function, the `input` field should be `dict`. If `allow_no_arg` is `True`, it can also be `None`.
 
+If input is a dict, all value in input.values() must be able to render as a string with f-string i.e. `f"{value}"`
+
 ```python title="Input: String Output:String"
 from slambda import Example
 

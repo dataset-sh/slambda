@@ -18,7 +18,7 @@ pip install slambda
 ## Prerequisite
 
 Currently, sLambda only supports OpenAI's ChatCompletion API, so you will need an OpenAI API key in order to use this
-package,
+package.
 
 Please check [OpenAI's documentation: Authentication](https://platform.openai.com/docs/api-reference/authentication) if
 you need to create a new API key.  [Create an OpenAI API Key Here](https://platform.openai.com/account/api-keys).
@@ -53,7 +53,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # You can also do it by providing value directly
 openai.api_key = "sk-ThIsIsAFaKeKEY12345678990...."
-# But we considered to be a security risk, please read our guide on how to load api key for more details. 
+# But we consider to be a security risk, please read our guide on how to load api key for more details. 
 ```
 
 ## Define your own functions
@@ -62,7 +62,7 @@ openai.api_key = "sk-ThIsIsAFaKeKEY12345678990...."
 
 ### Extraction
 
-```python title="Extract stock Tickers"
+```python title="Extract Stock Tickers"
 from slambda.core import Example, UnaryFunction, GptApiOptions
 
 find_tickers = UnaryFunction.from_instruction(
@@ -110,11 +110,11 @@ extract_wiki_links(
 
 ### Generation
 
-```python title="Fix Grammar"
+```python title="Grammar and Spelling Error Correction"
 from slambda.core import Example, UnaryFunction
 
 fix_grammar = UnaryFunction.from_instruction(
-    instruction="Fix grammar and spelling error for user",
+    instruction="Fix grammar and spelling error for users",
     examples=[
         Example("I eat three applr yesteday.", "I ate three apples yesterday."),
     ]
@@ -126,7 +126,7 @@ fix_grammar(
 
 ```
 
-```python title="Write Essay"
+```python title="Generate Essay"
 from slambda.core import Example, KeywordFunction
 
 generate_essay = KeywordFunction.from_instruction(
@@ -152,7 +152,7 @@ generate_essay(
     title=" Why I want to apply for master degree in computer science",
     work_experience="actor, bartender",
     education_experience="Bachelor degree in english",
-    age=60  # Yes, you can add more information beyond what is included in the examples. 
+    age=60  # Yes, it is possible to customize and add more input parameters on the fly 
 )
 
 # Output:
@@ -184,7 +184,7 @@ generate_essay(
 
 ### Classification
 
-```python title="Binary sentiment classifier"
+```python title="Binary Sentiment Classifier"
 from slambda.core import Example, UnaryFunction, GptApiOptions
 
 sentiment = UnaryFunction.from_instruction(
@@ -223,13 +223,13 @@ See [Functions](/docs/category/builtin-functions) for existing function implemen
 
 ## Project Status
 
-The basic functionalities of this package have been reasonably tested (coverage: 100%), and you should have no problem
+The basic functionalities of this package have been reasonably tested (coverage: 100%), and you should have no problems
 creating your own
 functions.
 
 Function implementations in `slambda.contrib` should have a reasonable output quality. However, since they are powered
 by a language model, you should conduct your own evaluation/testing within your problem domain to ensure that the
-model's performance meets your requirements.
+model's performance meeting your requirements.
 
 We plan to add more functions to `slambda.contrib` and provide a more thorough evaluation report for each function
 implementation in the near future.
