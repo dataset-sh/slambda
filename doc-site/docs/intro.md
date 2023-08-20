@@ -67,7 +67,7 @@ openai.api_key = "sk-ThIsIsAFaKeKEY12345678990...."
 ### Extraction
 
 ```python title="Extract Stock Tickers"
-from slambda.core import Example, UnaryFunction, GptApiOptions
+from slambda import Example, UnaryFunction, GptApiOptions
 
 find_tickers = UnaryFunction.from_instruction(
     instruction="Extract all companies' tickers mention in the news title.",
@@ -82,7 +82,7 @@ find_tickers("These Stocks Are Moving the Most Today: Keysight, Farfetch, XPeng,
 ```
 
 ```python title="Extract Wikipeida Links"
-from slambda.core import Example, UnaryFunction, GptApiOptions
+from slambda import Example, UnaryFunction, GptApiOptions
 
 extract_wiki_links = UnaryFunction.from_instruction(
     instruction="Extract all wikipedia entities mention in the text.",
@@ -115,7 +115,7 @@ extract_wiki_links(
 ### Generation
 
 ```python title="Grammar and Spelling Error Correction"
-from slambda.core import Example, UnaryFunction
+from slambda import Example, UnaryFunction
 
 fix_grammar = UnaryFunction.from_instruction(
     instruction="Fix grammar and spelling error for users",
@@ -131,7 +131,7 @@ fix_grammar(
 ```
 
 ```python title="Generate Essay"
-from slambda.core import Example, KeywordFunction
+from slambda import Example, KeywordFunction
 
 generate_essay = KeywordFunction.from_instruction(
     instruction="Write an grad school application essay about 250 words using the given information",
@@ -189,7 +189,7 @@ generate_essay(
 ### Classification
 
 ```python title="Binary Sentiment Classifier"
-from slambda.core import Example, UnaryFunction, GptApiOptions
+from slambda import Example, UnaryFunction, GptApiOptions
 
 sentiment = UnaryFunction.from_instruction(
     instruction='Detect sentiment of the given text, answer positive for positive sentiment, negative for negative sentiment, otherwise neutral.',
