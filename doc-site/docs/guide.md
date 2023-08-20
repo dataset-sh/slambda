@@ -15,7 +15,7 @@ language instruction, a set of
 example input/output pairs. For example:
 
 ```python
-from slambda.core import Example, UnaryFunction
+from slambda import Example, UnaryFunction
 
 fix_grammar = UnaryFunction.from_instruction(
     instruction="Fix grammar and spelling error for user",
@@ -82,7 +82,7 @@ this: `f("some value")`.
 You can also config a unary function with `allow_no_arg=True`, which allow you to call it with no arguments.
 
 ```python title="Unary Function"
-from slambda.core import Example, UnaryFunction
+from slambda import Example, UnaryFunction
 
 fix_grammar = UnaryFunction.from_instruction(
     instruction="Fix grammar and spelling error for user",
@@ -110,7 +110,7 @@ this: `f(name="jack", age=10)`.
 You can also config a keyword function with `allow_no_arg=True`, which allow you to call it with no arguments.
 
 ```python title="Keyword Function Example"
-from slambda.core import Example, KeywordFunction
+from slambda import Example, KeywordFunction
 
 generate_essay = KeywordFunction.from_instruction(
     instruction="Write an grad school application essay about 250 words using the given information",
@@ -209,7 +209,7 @@ Example(output={"aspects": [
 By providing Example with `dict` output, and `json_output=True`, you can make you function return a `dict`.
 
 ```python
-from slambda.core import Example, UnaryFunction, GptApiOptions
+from slambda import Example, UnaryFunction, GptApiOptions
 
 find_tickers = UnaryFunction.from_instruction(
     instruction="Extract all companies' tickers mention in the news title.",
