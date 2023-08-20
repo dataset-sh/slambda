@@ -5,8 +5,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build]
 exclude = [
     "/.*",
-    "/doc-site",
     "/dist",
+    "/doc-site",
+    "/slambda-playground",
     "/tests",
     "/utils",
 ]

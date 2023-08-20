@@ -314,7 +314,7 @@ motivate_me(return_resp_obj=True)
 
 For generation tasks such as writing, you may want a slightly higher temperature.
 For classification and extraction tasks where there exists a correct answer for each input, you should consider using a
-smaller temperature such as 0.
+lower temperature such as 0.
 
 ### Behind the scene
 
