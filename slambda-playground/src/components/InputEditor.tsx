@@ -8,7 +8,7 @@ export function InputEditor(
     }: {
         value: any, setValue: (nv: any) => void, type: InputType
     }) {
-    return <div>
+    return <>
         <TextareaAutosize value={value} onChange={e => setValue(e.target.value)}/>
-    </div>
+    </>
 }

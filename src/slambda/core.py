@@ -115,7 +115,7 @@ class Example(BaseModel):
 
     @property
     def is_json_output(self):
-        return isinstance(self.output, dict)
+        return isinstance(self.output, dict) or isinstance(self.output, list)
 
     @property
     def is_str_output(self):
@@ -258,6 +258,8 @@ class Definition(BaseModel):
         :param examples:
         :return:
         """
+        if self.description is None or self.description == '':
+            self.description = instruction
         self.init_messages = [
             Message.system(instruction)
         ]

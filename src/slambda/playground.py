@@ -1,4 +1,5 @@
 import datetime
+import importlib
 import json
 import sqlite3
 import uuid
@@ -10,11 +11,47 @@ from flask import Flask, jsonify, request
 from slambda import TextFunction, Definition
 import openai
 
+from slambda.core import try_parse_json
+
+
+def load_fn_by_name(module_name, function_name):
+    full_import_path = f"slambda.contrib.{module_name}"
+    fn_module = importlib.import_module(full_import_path)
+    return getattr(fn_module, function_name)
+
+
+DEFAULT_FNS = [{"module_name": "sentiment", "function_name": "sentiment"},
+               {"module_name": "entail", "function_name": "entail"},
+               {"module_name": "summarize", "function_name": "summarize"},
+               {"module_name": "motivate", "function_name": "motivate_me"},
+               {"module_name": "wiki_link", "function_name": "extract_wiki_links"},
+               {"module_name": "writing.grammar", "function_name": "fix_grammar"},
+               {"module_name": "writing.essay", "function_name": "generate_essay"}]
+
+
+def build_default_playground_fns():
+    ret = {}
+    for item in DEFAULT_FNS:
+        module_name = item['module_name']
+        function_name = item['function_name']
+        fn = load_fn_by_name(**item)
+        ret[f"{module_name}.{function_name}"] = fn.definition
+    return ret
+
 
 class ValueType(str, Enum):
     json = 'json'
     string = 'string'
     none = 'none'
+
+    @staticmethod
+    def of_value(value):
+        if value is None:
+            return ValueType.none
+        elif isinstance(value, str):
+            return ValueType.string
+        elif isinstance(value, dict):
+            return ValueType.json
 
 
 class NamedDefinition(BaseModel):
@@ -28,7 +65,7 @@ class PlayGroundStatus(BaseModel):
 
 
 class FnResult(BaseModel):
-    value: Optional[Union[str, Dict]] = None
+    value: Optional[Union[str, Dict, List]] = None
 
 
 class FnRequest(BaseModel):
@@ -41,7 +78,7 @@ class LogEntry(BaseModel):
     input_type: ValueType
     output_type: ValueType
     input_data: Optional[Union[str, Dict]] = None
-    output_data: Optional[Union[str, Dict]] = None
+    output_data: Optional[Union[str, Dict, List]] = None
     ts: datetime.datetime
 
     def normalize_to_db_entry(self) -> 'LogEntry':
@@ -54,14 +91,48 @@ class LogEntry(BaseModel):
             ts=self.ts
         )
 
+    def normalize_to_api_entry(self) -> 'LogEntry':
+        input_data = try_cast(self.input_data, self.input_type)
+        output_data = try_cast(self.output_data, self.output_type)
+        return LogEntry(
+            entry_id=self.entry_id,
+            input_data=input_data, input_type=self.input_type,
+            output_data=output_data, output_type=self.output_type,
+            ts=self.ts
+        )
 
-def try_cast(value, value_type: ValueType):
+
+class LogEntryListingResult(BaseModel):
+    entries: List[LogEntry]
+
+
+def try_cast(value, value_type: ValueType) -> Tuple[Optional[Union[str, Dict]], ValueType]:
     if value_type == ValueType.json:
-        pass
+        if value is None:
+            v = None
+            return v, ValueType.of_value(v)
+        elif isinstance(value, str):
+            v = try_parse_json(value)
+            return v, ValueType.of_value(v)
+        elif isinstance(value, dict):
+            v = value
+            return v, ValueType.of_value(v)
+
     elif value_type == ValueType.string:
-        pass
+        if value is None:
+            return '', ValueType.string
+        elif isinstance(value, str):
+            return value, ValueType.string
+        elif isinstance(value, dict):
+            return json.dumps(value), ValueType.string
+
     elif value_type == ValueType.none:
-        pass
+        if value is None:
+            return None, ValueType.none
+        elif isinstance(value, str):
+            return None, ValueType.none
+        elif isinstance(value, dict):
+            return None, ValueType.none
 
 
 def to_string_or_none(value, value_type: ValueType) -> Tuple[Optional[str], ValueType]:
@@ -171,8 +242,11 @@ class LogEntryController:
 class PlayGroundApp:
     fns: Dict[str, TextFunction]
 
-    def __init__(self, fns):
+    def __init__(self, fns=None):
+        if fns is None:
+            fns = build_default_playground_fns()
         self.fns = fns
+        self.log_controller = LogEntryController()
         self.app = Flask(__name__)
         self.add_routes()
 
@@ -199,26 +273,33 @@ class PlayGroundApp:
             has_key = openai.api_key is not None or openai.api_key_path is not None
             status = PlayGroundStatus(
                 has_key=has_key,
-                fns=[NamedDefinition(nname=n, definition=f.definition) for n, f in self.fns.items()]
+                fns=[NamedDefinition(name=n, definition=f) for n, f in self.fns.items()]
             )
             return jsonify(status.model_dump(mode='json')), 200
 
-        @self.app.route('/api/logs', methods=['GET'])
+        @self.app.route('/api/log', methods=['GET'])
         def get_logs():
             page = int(request.args.get('page', '1'))
-            has_key = openai.api_key is not None or openai.api_key_path is not None
-            status = PlayGroundStatus(
-                has_key=has_key,
-                fns=[NamedDefinition(nname=n, definition=f.definition) for n, f in self.fns.items()]
-            )
-            return jsonify(status.model_dump(mode='json')), 200
+            entries = self.log_controller.list_log_entries(page)
+            r = LogEntryListingResult(entries=entries)
+            return jsonify(r.model_dump(mode='json')), 200
 
-        @self.app.route('/', defaults={'path': ''})
-        @self.app.route('/<path:path>')
-        def catch_all(path):
-            return self.app.send_static_file("index.html")
+        @self.app.route('/api/log', methods=['DELETE'])
+        def remove_log():
+            items = request.json.get('items')
+            self.log_controller.remove_log_entries(items)
+            return "", 204
+
+        # @self.app.route('/', defaults={'path': ''})
+        # @self.app.route('/<path:path>')
+        # def catch_all(path):
+        #     return self.app.send_static_file("index.html")
 
     def run(self, **kwargs):
         if 'port' not in kwargs:
             kwargs['port'] = 6767
         self.app.run(**kwargs)
+
+
+if __name__ == '__main__':
+    PlayGroundApp().run()
