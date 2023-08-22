@@ -35,7 +35,7 @@ def build_default_playground_fns():
         module_name = item['module_name']
         function_name = item['function_name']
         fn = load_fn_by_name(**item)
-        ret[f"{module_name}.{function_name}"] = fn.definition
+        ret[f"{module_name}.{function_name}"] = fn
     return ret
 
 
@@ -65,7 +65,12 @@ class PlayGroundStatus(BaseModel):
 
 
 class FnResult(BaseModel):
+    type: ValueType
     value: Optional[Union[str, Dict, List]] = None
+
+    @staticmethod
+    def from_value(value):
+        return FnResult(value=value, type=ValueType.of_value(value))
 
 
 class FnRequest(BaseModel):
@@ -242,6 +247,13 @@ class LogEntryController:
 class PlayGroundApp:
     fns: Dict[str, TextFunction]
 
+    @staticmethod
+    def open(fn: TextFunction, name: Optional[str] = None):
+        if name is None:
+            name = fn.definition.name
+        if fn.definition.name is None or fn.definition.name == '':
+            pass
+
     def __init__(self, fns=None):
         if fns is None:
             fns = build_default_playground_fns()
@@ -251,29 +263,34 @@ class PlayGroundApp:
         self.add_routes()
 
     def add_routes(self):
-        app = Flask(__name__, static_folder='app', static_url_path="/app")
 
         @self.app.route('/api/inference', methods=['POST'])
         def inference():
             item_data = request.json
             fn_request = FnRequest(**item_data)
+            print(fn_request)
             fn = self.fns.get(fn_request.name, None)
             out = None
             if fn_request.input is None:
+                print('nullary')
                 out = fn()
-            elif isinstance(fn_request.input, dict) is None:
+            elif isinstance(fn_request.input, dict):
+                print('kw')
                 out = fn(**fn_request.input)
-            elif isinstance(fn_request.input, str) is None:
+            elif isinstance(fn_request.input, str):
+                print('unary')
                 out = fn(fn_request.input)
 
-            return jsonify(FnResult(value=out).model_dump(mode='json')), 200
+            print(out)
+
+            return jsonify(FnResult.from_value(out).model_dump(mode='json')), 200
 
         @self.app.route('/api/status', methods=['GET'])
         def get_system_status():
             has_key = openai.api_key is not None or openai.api_key_path is not None
             status = PlayGroundStatus(
                 has_key=has_key,
-                fns=[NamedDefinition(name=n, definition=f) for n, f in self.fns.items()]
+                fns=[NamedDefinition(name=n, definition=f.definition) for n, f in self.fns.items()]
             )
             return jsonify(status.model_dump(mode='json')), 200
 
@@ -302,4 +319,9 @@ class PlayGroundApp:
 
 
 if __name__ == '__main__':
+    import openai
+    import os
+
+    openai.api_key_path = os.path.expanduser('~/.openai.key')
+
     PlayGroundApp().run()

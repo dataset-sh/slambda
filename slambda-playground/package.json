@@ -48,5 +48,8 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://127.0.0.1:6767"
+  "proxy": "http://127.0.0.1:6767",
+  "devDependencies": {
+    "@types/lodash": "^4.14.197"
+  }
 }

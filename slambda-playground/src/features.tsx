@@ -31,8 +31,9 @@ export const Features = {
         return axios.get<ServerStatus>('/api/status')
     },
 
-    async inference(input: string | any) {
-        return axios.post('/api/inference', {})
+    async inference(name: string, input: string | any) {
+        const resp = await axios.post<FnResult>('/api/inference', {name, input})
+        return resp.data;
     },
 
     async listLogs(page: number) {

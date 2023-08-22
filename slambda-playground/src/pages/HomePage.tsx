@@ -8,6 +8,7 @@ import {grey} from "@mui/material/colors";
 import {
     Link as RouterLink,
 } from 'react-router-dom';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 export function FunctionNameView({name, definition}: NamedDefinition) {
     return <Card sx={{minHeight: '12em'}}>
@@ -21,6 +22,8 @@ export function FunctionNameView({name, definition}: NamedDefinition) {
         </CardContent>
         <CardActions>
             <Button
+                color={'primary'}
+                endIcon={<ArrowForwardIcon/>}
                 component={RouterLink} to={`/playground?name=${name}`}
                 sx={{ml: 1}} size="small">Run this function</Button>
         </CardActions>
@@ -32,11 +35,7 @@ export function HomePage(props: {}) {
     const navigate = useNavigate();
     const appCtx = useAppContext();
     const [search, setSearch] = React.useState('')
-    return <Box sx={{
-        p: 4,
-        display: 'flex',
-        flexDirection: 'column',
-    }}>
+    return <Box>
 
         <Box sx={{
             display: 'flex',
