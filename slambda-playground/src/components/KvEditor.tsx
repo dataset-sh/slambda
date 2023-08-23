@@ -305,6 +305,7 @@ export function KvEditor(
             <Divider sx={{my: 2}}></Divider>
 
             <Button
+                onClick={() => onSubmit(combineKVs(kvs))}
                 color={'success'}
                 variant={'contained'}
                 sx={{color: grey[200]}}
@@ -314,6 +315,15 @@ export function KvEditor(
         </Box>
     );
 };
+
+
+function combineKVs(kvs: KV[]){
+    const ret: any = {}
+    for (let kv of kvs){
+        ret[kv.name] = kv.value;
+    }
+    return ret;
+}
 
 function canSubmit(kvs: KV[], allowNullary: boolean, required?: string[]) {
     if (!required) {

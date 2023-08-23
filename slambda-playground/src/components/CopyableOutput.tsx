@@ -29,7 +29,7 @@ export function useCopyToClipboard(): [CopiedValue, CopyFn] {
     return [copiedText, copy]
 }
 
-export function CopyableOutput({value}: { value: string }) {
+export function CopyableOutput({value, title}: { value: string, title?: string }) {
     const [copiedValue, copy] = useCopyToClipboard()
     const [copiedGuard, setCopiedGuard] = React.useState(false);
 
@@ -47,7 +47,7 @@ export function CopyableOutput({value}: { value: string }) {
                     display: 'flex', flexDirection: 'row', alignItems: 'center', pl: 2}}
             >
                 <Typography sx={{flexGrow: 1}}>
-                    Function Output
+                    {title || 'Function Output'}
                 </Typography>
 
                 <Button onClick={() => {
@@ -62,7 +62,7 @@ export function CopyableOutput({value}: { value: string }) {
             </Box>
             <Divider/>
             <Box sx={{
-                mt: 2,
+                // mt: 2,
                 p: 2,
             }}>
                 <Typography

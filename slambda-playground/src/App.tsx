@@ -5,6 +5,7 @@ import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {AppContextProvider} from "./features";
 import {createTheme, ThemeProvider} from "@mui/material";
 import {green, red} from "@mui/material/colors";
+import {Helmet, HelmetProvider} from 'react-helmet-async';
 
 const queryClient = new QueryClient()
 
@@ -33,13 +34,15 @@ const theme = createTheme({
 
 function App() {
     return (
-        <QueryClientProvider client={queryClient}>
-            <AppContextProvider>
-                <ThemeProvider theme={theme}>
-                    <AppRoutes/>
-                </ThemeProvider>
-            </AppContextProvider>
-        </QueryClientProvider>
+        <HelmetProvider>
+            <QueryClientProvider client={queryClient}>
+                <AppContextProvider>
+                    <ThemeProvider theme={theme}>
+                        <AppRoutes/>
+                    </ThemeProvider>
+                </AppContextProvider>
+            </QueryClientProvider>
+        </HelmetProvider>
     );
 }
 

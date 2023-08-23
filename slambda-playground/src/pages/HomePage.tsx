@@ -9,6 +9,7 @@ import {
     Link as RouterLink,
 } from 'react-router-dom';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import {Helmet} from "react-helmet-async";
 
 export function FunctionNameView({name, definition}: NamedDefinition) {
     return <Card sx={{minHeight: '12em'}}>
@@ -36,6 +37,10 @@ export function HomePage(props: {}) {
     const appCtx = useAppContext();
     const [search, setSearch] = React.useState('')
     return <Box>
+        <Helmet>
+            <title>sλ Playground</title>
+            <link rel="canonical" href="https://www.tacobell.com/"/>
+        </Helmet>
 
         <Box sx={{
             display: 'flex',

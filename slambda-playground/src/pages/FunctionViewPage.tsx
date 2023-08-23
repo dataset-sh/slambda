@@ -10,6 +10,7 @@ import FunctionsIcon from '@mui/icons-material/Functions';
 import Typography from "@mui/material/Typography";
 import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn';
 import LambdaIcon from "../components/LambdaIcon";
+import { Helmet } from "react-helmet-async";
 
 export function FunctionViewPage(props: {}) {
     const param = useParams();
@@ -46,29 +47,35 @@ export function FunctionViewPage(props: {}) {
         </Box>
     }
 
-    return <Box sx={{display: 'flex', flexDirection: 'column'}}>
+    return <>
+        <Helmet>
+            <title>sλ: {fnName}</title>
+            <link rel="canonical" href="https://www.tacobell.com/" />
+        </Helmet>
+        <Box sx={{display: 'flex', flexDirection: 'column'}}>
 
-        <Box sx={{ml: 4, display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-            <IconButton
-                color={'error'}
-                component={RouterLink}
-                to={'/'}
-            ><KeyboardReturnIcon/></IconButton>
-            <Box sx={{m: 1}}>
-                <LambdaIcon/>
+            <Box sx={{ml: 4, display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                <IconButton
+                    color={'error'}
+                    component={RouterLink}
+                    to={'/'}
+                ><KeyboardReturnIcon/></IconButton>
+                <Box sx={{m: 1}}>
+                    <LambdaIcon/>
+                </Box>
+                <Typography>{fnName}</Typography>
             </Box>
-            <Typography>{fnName}</Typography>
-        </Box>
 
-        <Box>
-            {editor}
-        </Box>
-        <Box sx={{mt: 2, mx: 4}}>
-            {submitMutation.isError && <Alert severity="error">Something is wrong.</Alert>}
-            {submitMutation.isLoading && <LinearProgress color="secondary"/>}
-            {submitMutation.isSuccess && <CopyableOutput value={submitMutation.data.value}/>}
-        </Box>
+            <Box>
+                {editor}
+            </Box>
+            <Box sx={{mt: 2, mx: 4}}>
+                {submitMutation.isError && <Alert severity="error">Something is wrong.</Alert>}
+                {submitMutation.isLoading && <LinearProgress color="secondary"/>}
+                {submitMutation.isSuccess && <CopyableOutput value={submitMutation.data.value}/>}
+            </Box>
 
-    </Box>
+        </Box>
+    </>
 }
 

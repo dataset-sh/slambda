@@ -80,16 +80,22 @@ class FnRequest(BaseModel):
 
 class LogEntry(BaseModel):
     entry_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    fn_name: str
     input_type: ValueType
     output_type: ValueType
     input_data: Optional[Union[str, Dict]] = None
     output_data: Optional[Union[str, Dict, List]] = None
-    ts: datetime.datetime
+    ts: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now())
 
     def normalize_to_db_entry(self) -> 'LogEntry':
+        """
+        Case input and output to string.
+        :return:
+        """
         input_data, input_type = to_string_or_none(self.input_data, self.input_type)
         output_data, output_type = to_string_or_none(self.output_data, self.output_type)
         return LogEntry(
+            fn_name=self.fn_name,
             entry_id=self.entry_id,
             input_data=input_data, input_type=input_type,
             output_data=output_data, output_type=output_type,
@@ -97,9 +103,14 @@ class LogEntry(BaseModel):
         )
 
     def normalize_to_api_entry(self) -> 'LogEntry':
-        input_data = try_cast(self.input_data, self.input_type)
-        output_data = try_cast(self.output_data, self.output_type)
+        """
+        Case input and output according to its value type.
+        :return:
+        """
+        input_data, input_type = try_cast(self.input_data, self.input_type)
+        output_data, output_type = try_cast(self.output_data, self.output_type)
         return LogEntry(
+            fn_name=self.fn_name,
             entry_id=self.entry_id,
             input_data=input_data, input_type=self.input_type,
             output_data=output_data, output_type=self.output_type,
@@ -112,6 +123,13 @@ class LogEntryListingResult(BaseModel):
 
 
 def try_cast(value, value_type: ValueType) -> Tuple[Optional[Union[str, Dict]], ValueType]:
+    """
+    Case value according to its value_type.
+
+    :param value:
+    :param value_type:
+    :return:
+    """
     if value_type == ValueType.json:
         if value is None:
             v = None
@@ -141,6 +159,12 @@ def try_cast(value, value_type: ValueType) -> Tuple[Optional[Union[str, Dict]], 
 
 
 def to_string_or_none(value, value_type: ValueType) -> Tuple[Optional[str], ValueType]:
+    """
+    Encode value to string
+    :param value:
+    :param value_type:
+    :return:
+    """
     if value_type == ValueType.json:
         if isinstance(value, dict):
             return json.dumps(value), ValueType.string
@@ -161,7 +185,7 @@ class LogEntryController:
         else:
             if dp_path is None:
                 dp_path = '.slambda-playground-log.db'
-            self.conn = sqlite3.connect(dp_path)
+            self.conn = sqlite3.connect(dp_path, check_same_thread=False)
         self.create_table()
 
     def create_table(self):
@@ -171,6 +195,7 @@ class LogEntryController:
         query = '''
         CREATE TABLE IF NOT EXISTS log_entries (
             entry_id TEXT PRIMARY KEY,
+            fn_name TEXT,
             input_type TEXT,
             output_type TEXT,
             input_data TEXT,
@@ -187,11 +212,16 @@ class LogEntryController:
         :param entry: LogEntry object
         """
         query = '''
-        INSERT INTO log_entries (entry_id, input_type, output_type, input_data, output_data, ts)
-        VALUES (?, ?, ?, ?, ?, ?);
+        INSERT INTO log_entries (entry_id, fn_name, input_type, output_type, input_data, output_data, ts)
+        VALUES (?, ?, ?, ?, ?, ?, ?);
         '''
+
+        entry = entry.normalize_to_db_entry()
+        print(entry)
+
         values = (
             entry.entry_id,
+            entry.fn_name,
             entry.input_type.value,
             entry.output_type.value,
             entry.input_data,
@@ -209,7 +239,7 @@ class LogEntryController:
         :return: List of LogEntry objects
         """
         query = '''
-        SELECT entry_id, input_type, output_type, input_data, output_data, ts
+        SELECT entry_id, fn_name, input_type, output_type, input_data, output_data, ts
         FROM log_entries
         ORDER BY ts DESC
         LIMIT ? OFFSET ?;
@@ -218,16 +248,21 @@ class LogEntryController:
         values = (entries_per_page, offset)
         cursor = self.conn.execute(query, values)
         entries = [
-            LogEntry(
-                entry_id=row[0],
-                input_type=ValueType(row[1]),
-                output_type=ValueType(row[2]),
-                input_data=row[3],
-                output_data=row[4],
-                ts=row[5]
-            )
-            for row in cursor.fetchall()
+
         ]
+
+        for row in cursor.fetchall():
+            entry_id, fn_name, input_type, output_type, input_data, output_data, ts = row
+            e = LogEntry(
+                entry_id=entry_id,
+                fn_name=fn_name,
+                input_type=input_type,
+                output_type=output_type,
+                input_data=input_data,
+                output_data=output_data,
+                ts=ts,
+            ).normalize_to_api_entry()
+            entries.append(e)
         return entries
 
     def remove_log_entries(self, entry_id_list: List[str]):
@@ -248,11 +283,24 @@ class PlayGroundApp:
     fns: Dict[str, TextFunction]
 
     @staticmethod
-    def open(fn: TextFunction, name: Optional[str] = None):
+    def open(fn: TextFunction, name: Optional[str] = None, auto_run=True, **kwargs):
         if name is None:
             name = fn.definition.name
-        if fn.definition.name is None or fn.definition.name == '':
-            pass
+            if name is None or name == '':
+                name = 'Playground Function'
+
+        fns = {name: fn}
+        app = PlayGroundApp(fns)
+        if auto_run:
+            app.run(**kwargs)
+        return app
+
+    @staticmethod
+    def open_function_dict(fns: Dict[str, TextFunction], auto_run=True, **kwargs):
+        app = PlayGroundApp(fns)
+        if auto_run:
+            app.run(**kwargs)
+        return app
 
     def __init__(self, fns=None):
         if fns is None:
@@ -268,20 +316,22 @@ class PlayGroundApp:
         def inference():
             item_data = request.json
             fn_request = FnRequest(**item_data)
-            print(fn_request)
             fn = self.fns.get(fn_request.name, None)
             out = None
             if fn_request.input is None:
-                print('nullary')
                 out = fn()
             elif isinstance(fn_request.input, dict):
-                print('kw')
                 out = fn(**fn_request.input)
             elif isinstance(fn_request.input, str):
-                print('unary')
                 out = fn(fn_request.input)
 
-            print(out)
+            self.log_controller.add_log_entry(LogEntry(
+                fn_name=fn_request.name,
+                input_type=ValueType.of_value(fn_request.input),
+                input_data=fn_request.input,
+                output_type=ValueType.of_value(out),
+                output_data=out,
+            ))
 
             return jsonify(FnResult.from_value(out).model_dump(mode='json')), 200
 
@@ -298,14 +348,15 @@ class PlayGroundApp:
         def get_logs():
             page = int(request.args.get('page', '1'))
             entries = self.log_controller.list_log_entries(page)
-            r = LogEntryListingResult(entries=entries)
+            print(len(entries))
+            r = LogEntryListingResult(entries=[e for e in entries])
             return jsonify(r.model_dump(mode='json')), 200
 
-        @self.app.route('/api/log', methods=['DELETE'])
-        def remove_log():
-            items = request.json.get('items')
-            self.log_controller.remove_log_entries(items)
-            return "", 204
+        # @self.app.route('/api/log', methods=['DELETE'])
+        # def remove_log():
+        #     items = request.json.get('items')
+        #     self.log_controller.remove_log_entries(items)
+        #     return "", 204
 
         # @self.app.route('/', defaults={'path': ''})
         # @self.app.route('/<path:path>')
@@ -313,13 +364,14 @@ class PlayGroundApp:
         #     return self.app.send_static_file("index.html")
 
     def run(self, **kwargs):
+        host = kwargs.get('host', '127.0.0.1')
         if 'port' not in kwargs:
             kwargs['port'] = 6767
+        print(f'Starting playgroun at http://{host}:{kwargs["port"]}')
         self.app.run(**kwargs)
 
 
 if __name__ == '__main__':
-    import openai
     import os
 
     openai.api_key_path = os.path.expanduser('~/.openai.key')

@@ -19,6 +19,7 @@ export type ValueType = 'json' | 'none' | 'string'
 
 export type LogEntry = {
     entry_id: string
+    fn_name: string
     input_type: ValueType
     output_type: ValueType
     input_data: any
