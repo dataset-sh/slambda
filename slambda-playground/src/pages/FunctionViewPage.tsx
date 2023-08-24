@@ -10,7 +10,7 @@ import FunctionsIcon from '@mui/icons-material/Functions';
 import Typography from "@mui/material/Typography";
 import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn';
 import LambdaIcon from "../components/LambdaIcon";
-import { Helmet } from "react-helmet-async";
+import {Helmet} from "react-helmet-async";
 
 export function FunctionViewPage(props: {}) {
     const param = useParams();
@@ -50,7 +50,6 @@ export function FunctionViewPage(props: {}) {
     return <>
         <Helmet>
             <title>sλ: {fnName}</title>
-            <link rel="canonical" href="https://www.tacobell.com/" />
         </Helmet>
         <Box sx={{display: 'flex', flexDirection: 'column'}}>
 

@@ -27,7 +27,7 @@ Install python-dotenv
 pip install python-dotenv
 ```
 
-Now create a file `.env.local`, and make sure you also include this in your `.gitignore` file.
+Now create a file `.env.local` in your current directory, and make sure you also include this in your `.gitignore` file.
 
 ```shell title=".env.local"
 OPENAI_API_KEY = "sk-ThIsIsAFaKeKEY12345678990...."
@@ -40,12 +40,13 @@ import os
 import openai
 from dotenv import load_dotenv
 
-load_dotenv('.local.env')  # take environment variables from .env.
+load_dotenv('.env.local')  # take environment variables from .env.
 
 # We highly recommend you to load OPENAI_API_KEY via environmental variable 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 ```
+
 ### Directly by value (NOT Recommended)
 
 The most straightforward approach for providing an API key is loading its value directly. However, it's important to

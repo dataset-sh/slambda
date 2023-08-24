@@ -57,7 +57,7 @@ In sLambda, there are 3 types of functions depending on input/output shape:
 
 #### Nullary Function
 
-A nullary functiontakes no arguments. For example, a nullary function `f`, can only be used like this: `f()`.
+A nullary function takes no arguments. For example, a nullary function `f`, can only be used like this: `f()`.
 
 ```python title="Nullary Function Example"
 from slambda import NullaryFunction, Example
@@ -140,9 +140,9 @@ In conclusion, my journey – from electrician to financial analyst, fortified b
 )
 
 generate_essay(
-    title=" Why I want to apply for master degree in computer science",
+    title=" Why I want to apply for master's degree in computer science",
     work_experience="actor, bartender",
-    education_experience="Bachelor degree in english",
+    education_experience="Bachelor's degree in english", 
     age=60  # Yes, you can add more information beyond what is included in the examples. 
 )
 # Output is omitted
@@ -162,7 +162,7 @@ instruction = "Fix grammar and spelling errors for user"
 
 ### Example
 
-Example is defined as below and will be served as one/few shots learning example during inference:
+Example is defined as below and will be served as one/few shots learning examples during inference:
 
 ```python
 class Example(BaseModel):
@@ -178,7 +178,7 @@ The `input` field of `Example` can be one of `None`, a `str` value, or a `dict` 
 The `output` field of `Example` can be either a `str` value, or a `dict`/`list` object.
 
 * For nullary function, the `input` field should be `None`.
-* For unary function, the `input` field should be `string`. If `allow_no_arg` is `True`, it can also be `None`.
+* For unary function, the `input` field should be `str`. If `allow_no_arg` is `True`, it can also be `None`.
 * For keyword function, the `input` field should be `dict`. If `allow_no_arg` is `True`, it can also be `None`.
 
 If input is a `dict`, all value in `input.values()` must be able to render as a string with f-string i.e. `f"{value}"`
@@ -322,6 +322,6 @@ lower temperature such as 0.
 Instruction and Examples are translated into `system` messages similar to this
 [Cookbook Recipe](https://github.com/openai/openai-cookbook/blob/main/examples/How_to_format_inputs_to_ChatGPT_models.ipynb).
 Our documentation of existing functions contains a visualization of its message stack that may help you understand what
-is happened behind the scene, for
+is happening behind the scene, for
 example see [writing.essay](/docs/functions/writing/essay).
 

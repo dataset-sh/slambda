@@ -26,7 +26,6 @@ export function LogListPage(props: {}) {
     return <>
         <Helmet>
             <title>sλ: logs</title>
-            <link rel="canonical" href="https://www.tacobell.com/"/>
         </Helmet>
 
         <Box></Box>
