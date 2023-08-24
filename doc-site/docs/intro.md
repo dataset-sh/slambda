@@ -133,7 +133,7 @@ find_tickers("These Stocks Are Moving the Most Today: Keysight, Farfetch, XPeng,
 from slambda import Example, UnaryFunction, GptApiOptions
 
 extract_wiki_links = UnaryFunction.from_instruction(
-    instruction="Extract all wikipedia entities mention in the text to markdown format.",
+    instruction="Extract all wikipedia entities mention in the text.",
     examples=[
         Example(
             input="An analog computer or analogue computer is a type of computer that uses the continuous variation"
