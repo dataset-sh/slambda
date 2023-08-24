@@ -5,15 +5,16 @@ build-backend = "hatchling.build"
 [tool.hatch.build]
 exclude = [
     "/.*",
-    "/doc-site",
     "/dist",
+    "/doc-site",
+    "/slambda-playground",
     "/tests",
     "/utils",
 ]
 
 [project]
 name = "slambda"
-version = "0.0.9"
+version = "0.0.10"
 authors = [
     { name = "Hao Wu", email = "haowu@dataset.sh" },
 ]
@@ -36,3 +37,4 @@ license = { text = "MIT License" }
 [project.urls]
 "Homepage" = "https://slambda.dataset.sh"
 "Bug Tracker" = "https://github.com/dataset-sh/slambda/issues"
+
