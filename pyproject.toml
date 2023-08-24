@@ -12,13 +12,17 @@ exclude = [
     "/utils",
 ]
 
+artifacts = [
+    "playground.frontend"
+]
+
 [project]
 name = "slambda"
-version = "0.0.10"
+version = "0.0.11"
 authors = [
     { name = "Hao Wu", email = "haowu@dataset.sh" },
 ]
-description = "Making LLMs Calls Simple: Use LLMs Inference as Easy as a Regular Function!"
+description = "Instruction is Function!"
 readme = "readme.md"
 requires-python = ">=3.9"
 classifiers = [

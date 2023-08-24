@@ -5,7 +5,7 @@ clean:
 playground:
 	utils/build_frontend.sh
 
-package: playground
+package:
 	utils/package.sh
 
 upload:
