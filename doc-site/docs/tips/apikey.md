@@ -1,5 +1,6 @@
 ---
 title: OpenAI API Keys
+description: "Slambda: How to load OpenAI API Keys" 
 sidebar_position: 1
 ---
 

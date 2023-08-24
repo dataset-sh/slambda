@@ -1,5 +1,6 @@
 ---
 title: API Reference
+description: Slambda API reference
 sidebar_position: 4
 ---
 

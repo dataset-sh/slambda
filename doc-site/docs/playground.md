@@ -1,5 +1,6 @@
 ---
 title: Playground (Experimental)
+description: How to use Slambda Playground (Experimental)
 sidebar_position: 7
 ---
 

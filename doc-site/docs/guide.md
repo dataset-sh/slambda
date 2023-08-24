@@ -1,5 +1,6 @@
 ---
 title: "Guide"
+description: Slambda Usage Guide
 sidebar_position: 2
 ---
 
