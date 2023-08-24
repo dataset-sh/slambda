@@ -44,7 +44,8 @@ export function CopyableOutput({value, title}: { value: string, title?: string }
             <Box
                 sx={{
                     backgroundColor: grey[200],
-                    display: 'flex', flexDirection: 'row', alignItems: 'center', pl: 2}}
+                    display: 'flex', flexDirection: 'row', alignItems: 'center', pl: 2
+                }}
             >
                 <Typography sx={{flexGrow: 1}}>
                     {title || 'Function Output'}

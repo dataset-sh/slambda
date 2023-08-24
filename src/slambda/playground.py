@@ -3,10 +3,13 @@ import importlib
 import json
 import sqlite3
 import uuid
+import zipfile
 from enum import Enum
 from typing import Dict, Union, Optional, List, Tuple
 from pydantic import BaseModel, Field
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
+import importlib.resources as pkg_resources
+import mimetypes
 
 from slambda import TextFunction, Definition
 import openai
@@ -20,21 +23,22 @@ def load_fn_by_name(module_name, function_name):
     return getattr(fn_module, function_name)
 
 
-DEFAULT_FNS = [{"module_name": "sentiment", "function_name": "sentiment"},
-               {"module_name": "entail", "function_name": "entail"},
-               {"module_name": "summarize", "function_name": "summarize"},
-               {"module_name": "motivate", "function_name": "motivate_me"},
-               {"module_name": "wiki_link", "function_name": "extract_wiki_links"},
-               {"module_name": "writing.grammar", "function_name": "fix_grammar"},
-               {"module_name": "writing.essay", "function_name": "generate_essay"}]
+DEFAULT_FNS = [
+    "sentiment:sentiment",
+    "entail:entail",
+    "summarize:summarize",
+    "motivate:motivate_me",
+    "wiki_link:extract_wiki_links",
+    "writing.grammar:fix_grammar",
+    "writing.essay:generate_essay"
+]
 
 
 def build_default_playground_fns():
     ret = {}
     for item in DEFAULT_FNS:
-        module_name = item['module_name']
-        function_name = item['function_name']
-        fn = load_fn_by_name(**item)
+        module_name, function_name = item.split(':')
+        fn = load_fn_by_name(module_name, function_name)
         ret[f"{module_name}.{function_name}"] = fn
     return ret
 
@@ -217,7 +221,6 @@ class LogEntryController:
         '''
 
         entry = entry.normalize_to_db_entry()
-        print(entry)
 
         values = (
             entry.entry_id,
@@ -279,7 +282,7 @@ class LogEntryController:
         self.conn.commit()
 
 
-class PlayGroundApp:
+class PlaygroundApp:
     fns: Dict[str, TextFunction]
 
     @staticmethod
@@ -290,14 +293,14 @@ class PlayGroundApp:
                 name = 'Playground Function'
 
         fns = {name: fn}
-        app = PlayGroundApp(fns)
+        app = PlaygroundApp(fns)
         if auto_run:
             app.run(**kwargs)
         return app
 
     @staticmethod
     def open_function_dict(fns: Dict[str, TextFunction], auto_run=True, **kwargs):
-        app = PlayGroundApp(fns)
+        app = PlaygroundApp(fns)
         if auto_run:
             app.run(**kwargs)
         return app
@@ -307,10 +310,11 @@ class PlayGroundApp:
             fns = build_default_playground_fns()
         self.fns = fns
         self.log_controller = LogEntryController()
-        self.app = Flask(__name__)
+        self.app = Flask(__name__, static_folder=None)
         self.add_routes()
 
     def add_routes(self):
+        self.load_frontend()
 
         @self.app.route('/api/inference', methods=['POST'])
         def inference():
@@ -344,31 +348,44 @@ class PlayGroundApp:
             )
             return jsonify(status.model_dump(mode='json')), 200
 
-        @self.app.route('/api/log', methods=['GET'])
+        @self.app.route('/api/inference-log', methods=['GET'])
         def get_logs():
             page = int(request.args.get('page', '1'))
             entries = self.log_controller.list_log_entries(page)
-            print(len(entries))
             r = LogEntryListingResult(entries=[e for e in entries])
             return jsonify(r.model_dump(mode='json')), 200
 
-        # @self.app.route('/api/log', methods=['DELETE'])
-        # def remove_log():
-        #     items = request.json.get('items')
-        #     self.log_controller.remove_log_entries(items)
-        #     return "", 204
-
-        # @self.app.route('/', defaults={'path': ''})
-        # @self.app.route('/<path:path>')
-        # def catch_all(path):
-        #     return self.app.send_static_file("index.html")
+        @self.app.route('/', defaults={'path': ''})
+        @self.app.route("/<string:path>")
+        @self.app.route('/<path:path>')
+        def catch_all(path):
+            fp = 'build/' + path
+            if fp not in self.frontend_assets:
+                fp = 'build/index.html'
+            mime_type, _ = mimetypes.guess_type(fp)
+            content_bytes = self.frontend_assets[fp]
+            if mime_type is None:
+                mime_type = 'application/octet-stream'
+            return Response(content_bytes, content_type=mime_type)
 
     def run(self, **kwargs):
         host = kwargs.get('host', '127.0.0.1')
         if 'port' not in kwargs:
             kwargs['port'] = 6767
-        print(f'Starting playgroun at http://{host}:{kwargs["port"]}')
+        print(f'Starting playground at http://{host}:{kwargs["port"]}')
         self.app.run(**kwargs)
+
+    def load_frontend(self):
+        self.frontend_assets = {}
+        with pkg_resources.path("slambda.data", 'playground.frontend') as asset_zip_path:
+            with zipfile.ZipFile(asset_zip_path, 'r') as zip_ref:
+                for file_info in zip_ref.infolist():
+                    if file_info.is_dir():
+                        continue
+                    with zip_ref.open(file_info) as file:
+                        file_content = file.read()
+                        self.frontend_assets[file_info.filename] = file_content
+        pass
 
 
 if __name__ == '__main__':
@@ -376,4 +393,5 @@ if __name__ == '__main__':
 
     openai.api_key_path = os.path.expanduser('~/.openai.key')
 
-    PlayGroundApp().run()
+    app = PlaygroundApp()
+    app.run()

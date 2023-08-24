@@ -40,7 +40,7 @@ export const Features = {
     async listLogs(page: number) {
         return axios.get<{
             entries: LogEntry[]
-        }>('/api/log', {
+        }>('/api/inference-log', {
             params: {
                 page
             }

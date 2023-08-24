@@ -34,7 +34,7 @@ export function LogListPage(props: {}) {
         <Box>
             {info.isSuccess}
             {info.isLoading && <LinearProgress color="secondary"/>}
-            {info.isError && <Alert severity="error">This is an error alert — check it out!</Alert>}
+            {info.isError && <Alert severity="error">Something is wrong.</Alert>}
             {info.data?.data.entries.map((entry, i) => {
                 const ts = moment(entry.ts)
                 return <Card key={entry.entry_id} sx={{p: 2, mb: 4}}>
