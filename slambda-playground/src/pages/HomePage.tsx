@@ -39,7 +39,6 @@ export function HomePage(props: {}) {
     return <Box>
         <Helmet>
             <title>sλ Playground</title>
-            <link rel="canonical" href="https://www.tacobell.com/"/>
         </Helmet>
 
         <Box sx={{
