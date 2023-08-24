@@ -4,10 +4,12 @@ sidebar_position: 2
 ---
 
 # Guide
+
 :::tip
 You can enable code block warp in this guide by clicking this button
 ![Code Block Warp Button](/img/code-block-wrap-button.png)
 :::
+
 ## Concepts
 
 In sLambda, functions are defined by instruction and examples. We create normal python function using only a natural
@@ -18,7 +20,7 @@ example input/output pairs. For example:
 from slambda import Example, UnaryFunction
 
 fix_grammar = UnaryFunction.from_instruction(
-    instruction="Fix grammar and spelling error for user",
+    instruction="Fix grammar and spelling errors for user",
     examples=[
         Example("I eat three applr yesteday.", "I ate three apples yesterday."),
     ]
@@ -68,15 +70,15 @@ motivate_me = NullaryFunction.from_instruction(
         )
     ],
     default_message="Generate a motivational message.",
-    json_output=None,  # Set to True, if you want your function to return a json(python dict) value. 
 )
 
 motivate_me()
+# Output is omitted
 ```
 
 #### Unary Function
 
-An unary function takes exactly one positional argument. For example, a unary function `f`, can only be used like
+A unary function takes exactly one positional argument. For example, a unary function `f`, can only be used like
 this: `f("some value")`.
 
 You can also config a unary function with `allow_no_arg=True`, which allow you to call it with no arguments.
@@ -94,7 +96,6 @@ fix_grammar = UnaryFunction.from_instruction(
     ],
     allow_no_arg=False,
     default_message=None,  # If allow_no_arg=true, this will be the default argument, i.e. f() == f(default_message)
-    json_output=None,  # Set to True, if you want your function to return a json(python dict) value. 
 )
 
 fix_grammar(
@@ -136,7 +137,6 @@ In conclusion, my journey – from electrician to financial analyst, fortified b
 
     allow_no_arg=False,
     default_message=None,  # If allow_no_arg=true, this will be the default argument, i.e. f() == f(default_message)
-    json_output=None,  # Set to True, if you want your function to return a json(python dict) value. 
 )
 
 generate_essay(
@@ -145,6 +145,7 @@ generate_essay(
     education_experience="Bachelor degree in english",
     age=60  # Yes, you can add more information beyond what is included in the examples. 
 )
+# Output is omitted
 ```
 
 if message_template is provided, it will be used to render the out-going message by
@@ -156,17 +157,17 @@ running `message_template.format(**kwargs)`
 Instructions are simply natural language command, for example:
 
 ```python
-instruction = "Fix grammar and spelling error for user"
+instruction = "Fix grammar and spelling errors for user"
 ```
 
 ### Example
 
-Example are defined as below and will be served as few shots learning example during inference:
+Example is defined as below and will be served as one/few shots learning example during inference:
 
 ```python
 class Example(BaseModel):
     input: Optional[Union[Dict, str]] = None
-    output: Union[Dict, str] = None
+    output: Union[Dict, List, str] = None
 
     def __init__(self, input=None, output=None, **kwargs):
         super().__init__(input=input, output=output, **kwargs)
@@ -174,13 +175,13 @@ class Example(BaseModel):
 
 The `input` field of `Example` can be one of `None`, a `str` value, or a `dict` object.
 
-The `output` field of `Example` can be either a `str` value, or a `dict` object.
+The `output` field of `Example` can be either a `str` value, or a `dict`/`list` object.
 
 * For nullary function, the `input` field should be `None`.
 * For unary function, the `input` field should be `string`. If `allow_no_arg` is `True`, it can also be `None`.
 * For keyword function, the `input` field should be `dict`. If `allow_no_arg` is `True`, it can also be `None`.
 
-If input is a dict, all value in input.values() must be able to render as a string with f-string i.e. `f"{value}"`
+If input is a `dict`, all value in `input.values()` must be able to render as a string with f-string i.e. `f"{value}"`
 
 ```python title="Input: String Output:String"
 from slambda import Example
@@ -188,7 +189,7 @@ from slambda import Example
 # String to String
 Example("food is great", "positive")
 
-# String to Dict
+# String to Dict/List
 Example("food is great", [{"sentiment": "positive", "aspect": "food"}])
 
 # Empty input to String
@@ -206,7 +207,7 @@ Example(output={"aspects": [
 
 ### Json Output
 
-By providing Example with `dict` output, and `json_output=True`, you can make you function return a `dict`.
+By providing Example with `dict`/`list` output, and `json_output=True`, you can make you function return a `dict`.
 
 ```python
 from slambda import Example, UnaryFunction, GptApiOptions
@@ -290,7 +291,7 @@ motivate_me(return_resp_obj=True)
 You can use `return_resp_obj=True` keyword when calling your slambda function, which will force the function to return
 the raw OpenAI response object.
 
-Note that `return_resp_obj=True` be default when `stream=True`.
+Note that `return_resp_obj=True` by default when `stream=True`.
 
 ```python
 from slambda import NullaryFunction, Example, GptApiOptions
@@ -320,6 +321,7 @@ lower temperature such as 0.
 
 Instruction and Examples are translated into `system` messages similar to this
 [Cookbook Recipe](https://github.com/openai/openai-cookbook/blob/main/examples/How_to_format_inputs_to_ChatGPT_models.ipynb).
-Our documentation of existing functions contains a visualization of its message stack, for
-example [writing.essay](/docs/functions/writing/essay),
-which may help you understand what is happened behind the scene.
+Our documentation of existing functions contains a visualization of its message stack that may help you understand what
+is happened behind the scene, for
+example see [writing.essay](/docs/functions/writing/essay).
+

@@ -89,7 +89,7 @@ class Example(BaseModel):
         output: `str` value, or a `dict` object.
     """
     input: Optional[Union[Dict, str]] = None
-    output: Union[Dict, str] = None
+    output: Union[Dict, str, List] = None
 
     def __init__(self, input=None, output=None, **kwargs):
         super().__init__(input=input, output=output, **kwargs)

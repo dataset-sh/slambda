@@ -69,7 +69,7 @@ class Example(BaseModel):
         output: `str` value, or a `dict` object.
     """
     input: Optional[Union[Dict, str]] = None
-    output: Union[Dict, str] = None
+    output: Union[Dict, List, str] = None
 ```
 
 ```python

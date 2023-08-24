@@ -171,14 +171,14 @@ def to_string_or_none(value, value_type: ValueType) -> Tuple[Optional[str], Valu
     """
     if value_type == ValueType.json:
         if isinstance(value, dict):
-            return json.dumps(value), ValueType.string
-        if isinstance(value, dict):
-            return json.dumps(value), ValueType.string
+            return json.dumps(value), value_type
+        if isinstance(value, list):
+            return json.dumps(value), value_type
 
     elif value_type == ValueType.string:
-        return value, ValueType.string
+        return value, value_type
     elif value_type == ValueType.none:
-        return value, ValueType.string
+        return value, value_type
 
 
 class LogEntryController:
@@ -389,9 +389,5 @@ class PlaygroundApp:
 
 
 if __name__ == '__main__':
-    import os
-
-    openai.api_key_path = os.path.expanduser('~/.openai.key')
-
     app = PlaygroundApp()
     app.run()

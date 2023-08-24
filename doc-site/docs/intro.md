@@ -4,10 +4,12 @@ sidebar_position: 1
 ---
 
 # Getting Started
+
 :::tip
 You can enable code block warp in this guide by clicking this button
 ![Code Block Warp Button](/img/code-block-wrap-button.png)
 :::
+
 ## What does slambda do?
 
 We turn instruction and examples into plain python function powered by LLM.
@@ -17,7 +19,6 @@ We turn instruction and examples into plain python function powered by LLM.
 ```bash
 pip install slambda
 ```
-
 
 ## Prerequisite
 
@@ -62,7 +63,51 @@ openai.api_key = "sk-ThIsIsAFaKeKEY12345678990...."
 
 ## Define your own functions
 
-`sLambda` can help you turn OpenAI's ChatCompletion api into a extraction, classification, generation api with ease.
+`sLambda` will help you implement common NLP tasks using OpenAI's ChatCompletion api, including but not limit to
+
+* extraction
+    * named entity
+    * events
+    * relation
+    * ...
+* classification
+    * sentiment
+    * topic
+    * ...
+* generation
+    * summarization
+    * paraphrasing
+    * translation
+    * essay writing
+    * ...
+
+In order to implement your function, All you need to do is the following steps:
+
+1. Choose your [function arity](https://en.wikipedia.org/wiki/Arity)
+    * if your function take no input argument, you should use `NullaryFunction`.
+    * if your function will receive one string input argument, you should use `UnaryFunction`.
+    * if your function will receive multiple string input arguments, you should use `KeywordFunction`.
+2. Write an instruction about your task
+3. Provide several example using `slambda.Example` class.
+
+```python title='Example: Named Entity Recognition'
+from slambda import Example, UnaryFunction, GptApiOptions
+
+# 1. Arity
+find_tickers = UnaryFunction.from_instruction(
+    # 2. Instruction
+    instruction="Extract all companies' name mention in the news title.",
+    # 3. Examples
+    examples=[
+        Example(input="Why Kroger, Albertsons need to merge immediately to compete with Walmart",
+                output="Kroger, Albertsons, Walmart")
+    ],
+    gpt_opts=GptApiOptions(temperature=0)
+)
+
+find_tickers("TriNet Group, Inc. Commences a Fixed Price Tender Offer to Repurchase up to 5,981,308 Shares")
+# Output: TriNet Group, Inc.
+```
 
 ### Extraction
 
@@ -72,7 +117,10 @@ from slambda import Example, UnaryFunction, GptApiOptions
 find_tickers = UnaryFunction.from_instruction(
     instruction="Extract all companies' tickers mention in the news title.",
     examples=[
-        Example("Why Kroger, Albertsons need to merge immediately to compete with Walmart", "$KR, $ACI")
+        Example(
+            input="Why Kroger, Albertsons need to merge immediately to compete with Walmart",
+            output="$KR, $ACI, $WMT",
+        )
     ],
     gpt_opts=GptApiOptions(temperature=0)
 )
@@ -85,31 +133,52 @@ find_tickers("These Stocks Are Moving the Most Today: Keysight, Farfetch, XPeng,
 from slambda import Example, UnaryFunction, GptApiOptions
 
 extract_wiki_links = UnaryFunction.from_instruction(
-    instruction="Extract all wikipedia entities mention in the text.",
+    instruction="Extract all wikipedia entities mention in the text to markdown format.",
     examples=[
         Example(
             input="An analog computer or analogue computer is a type of computer that uses the continuous variation"
                   "aspect of physical phenomena such as electrical, mechanical, or hydraulic quantities (analog signals) "
                   "to model the problem being solved.",
-            output="""
-[computer](https://en.wikipedia.org/wiki/Computation)
-[electrical](https://en.wikipedia.org/wiki/Electrical_network)
-[mechanical](https://en.wikipedia.org/wiki/Mechanics)
-[hydraulic](https://en.wikipedia.org/wiki/Hydraulics)
-[analog signals](https://en.wikipedia.org/wiki/Analog_signal)
-                """.strip()
+            output=[
+                {
+                    "name": "computer",
+                    "url": "https://en.wikipedia.org/wiki/Computation",
+
+                },
+                {
+                    "name": "electrical",
+                    "url": "https://en.wikipedia.org/wiki/Electrical_network",
+                },
+                {
+                    "name": "mechanical",
+                    "url": "https://en.wikipedia.org/wiki/Mechanics",
+                },
+                {
+                    "name": "hydraulic",
+                    "url": "https://en.wikipedia.org/wiki/Hydraulics",
+                },
+                {
+                    "name": "analog signals",
+                    "url": "https://en.wikipedia.org/wiki/Analog_signal",
+                }
+            ]
         )
     ],
     gpt_opts=GptApiOptions(temperature=0)
 )
 
+# If the example out is a dict or list object, the function will also return a dict or list object instead of string.
 extract_wiki_links(
     "Without negative feedback, and optionally positive feedback for regeneration, an op amp acts as a comparator.")
 
-# Output: 
-# [negative feedback](https://en.wikipedia.org/wiki/Negative_feedback)
-# [op amp](https://en.wikipedia.org/wiki/Operational_amplifier)
-# [comparator](https://en.wikipedia.org/wiki/Comparator)
+# Output (this output is a python dict):  
+# [{'name': 'negative feedback',
+#  'url': 'https://en.wikipedia.org/wiki/Negative_feedback'},
+# {'name': 'positive feedback',
+#  'url': 'https://en.wikipedia.org/wiki/Positive_feedback'},
+# {'name': 'op amp',
+#  'url': 'https://en.wikipedia.org/wiki/Operational_amplifier'},
+# {'name': 'comparator', 'url': 'https://en.wikipedia.org/wiki/Comparator'}]
 ```
 
 ### Generation
@@ -118,9 +187,12 @@ extract_wiki_links(
 from slambda import Example, UnaryFunction
 
 fix_grammar = UnaryFunction.from_instruction(
-    instruction="Fix grammar and spelling error for users",
+    instruction="Fix grammar and spelling errors for user",
     examples=[
-        Example("I eat three applr yesteday.", "I ate three apples yesterday."),
+        Example(
+            input="I eat three applr yesteday.",
+            output="I ate three apples yesterday."
+        ),
     ]
 )
 
@@ -140,7 +212,8 @@ generate_essay = KeywordFunction.from_instruction(
             input={
                 "title": " Why I want to apply for master degree in computer science",
                 "work_experience": "electrician, financial analyst",
-                "education_experience": "Bachelor degree in english",
+                "education_experience": "Bachelor degree in english", 
+                # simple typo such as bachelor (should be bachelor’s) should normally be ok. 
             },
             output="""
 Transitioning from being an electrician to a financial analyst, and equipped with a Bachelor's degree in English, I am driven to undertake a Master's degree in Computer Science. This decision arises from my diverse experiences, revealing the intersecting points between my past and the boundless possibilities of the tech world.
@@ -195,11 +268,11 @@ sentiment = UnaryFunction.from_instruction(
     instruction='Detect sentiment of the given text, answer positive for positive sentiment, negative for negative sentiment, otherwise neutral.',
     examples=[
         Example(
-            input="Absolutely love this product! The self-licking feature is a game-changer for ice cream lovers like me. No more melty messes, just pure enjoyment. A must-have for summer!",
+            input="Absolutely love this self licking ice cream cone! The self-licking feature is a game-changer for ice cream lovers like me. No more melty messes, just pure enjoyment. A must-have for summer!",
             output="positive"
         ),
         Example(
-            input="Bought this new HyperGadget Pro and what a disappointment! It feels cheap, doesn't work as advertised, and the battery life is a joke. Save your money and avoid this one.",
+            input="Bought this new HyperMultiFunctionGadget 16 X and what a disappointment! It feels cheap, doesn't work as advertised, and the battery life is a joke. Save your money and avoid this one.",
             output="negative"
         ),
         Example(

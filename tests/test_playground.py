@@ -22,9 +22,10 @@ class TestLogEntryController(TestCase):
 
     def test_add_log_entry(self):
         entry = LogEntry(
+            fn_name='fn',
             input_type=ValueType.json,
             output_type=ValueType.string,
-            input_data='{"key": "value"}',
+            input_data={"key": "value"},
             output_data='result',
             ts=datetime.now()
         )
@@ -35,9 +36,10 @@ class TestLogEntryController(TestCase):
 
     def test_list_log_entries(self):
         entry = LogEntry(
+            fn_name='fn',
             input_type=ValueType.json,
+            input_data={"key": "value"},
             output_type=ValueType.string,
-            input_data='{"key": "value"}',
             output_data='result',
             ts=datetime.now()
         )
@@ -48,9 +50,12 @@ class TestLogEntryController(TestCase):
 
     def test_remove_log_entries(self):
         entry = LogEntry(
+            fn_name='fn',
+
             input_type=ValueType.json,
+            input_data={"key": "value"},
+
             output_type=ValueType.string,
-            input_data='{"key": "value"}',
             output_data='result',
             ts=datetime.now()
         )
