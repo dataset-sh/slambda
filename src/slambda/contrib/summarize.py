@@ -1,4 +1,5 @@
-from slambda.core import Example, UnaryFunction
+from slambda.core import UnaryFunction
+from slambda import Example
 
 examples = [
     Example(

@@ -11,10 +11,10 @@ from flask import Flask, jsonify, request, Response
 import importlib.resources as pkg_resources
 import mimetypes
 
-from slambda import TextFunction, Definition
+from slambda import LmFunction, Definition
 import openai
 
-from slambda.core import try_parse_json
+from slambda.utils import try_parse_json
 
 
 def load_fn_by_name(module_name, function_name):
@@ -96,13 +96,13 @@ class LogEntry(BaseModel):
         Case input and output to string.
         :return:
         """
-        input_data, input_type = to_string_or_none(self.input_data, self.input_type)
-        output_data, output_type = to_string_or_none(self.output_data, self.output_type)
+        input_data = to_string_or_none(self.input_data, self.input_type)
+        output_data = to_string_or_none(self.output_data, self.output_type)
         return LogEntry(
             fn_name=self.fn_name,
             entry_id=self.entry_id,
-            input_data=input_data, input_type=input_type,
-            output_data=output_data, output_type=output_type,
+            input_data=input_data, input_type=self.input_type,
+            output_data=output_data, output_type=self.output_type,
             ts=self.ts
         )
 
@@ -111,8 +111,8 @@ class LogEntry(BaseModel):
         Case input and output according to its value type.
         :return:
         """
-        input_data, input_type = try_cast(self.input_data, self.input_type)
-        output_data, output_type = try_cast(self.output_data, self.output_type)
+        input_data = try_cast(self.input_data, self.input_type)
+        output_data = try_cast(self.output_data, self.output_type)
         return LogEntry(
             fn_name=self.fn_name,
             entry_id=self.entry_id,
@@ -126,7 +126,7 @@ class LogEntryListingResult(BaseModel):
     entries: List[LogEntry]
 
 
-def try_cast(value, value_type: ValueType) -> Tuple[Optional[Union[str, Dict]], ValueType]:
+def try_cast(value, value_type: ValueType) -> Optional[Union[str, Dict, List]]:
     """
     Case value according to its value_type.
 
@@ -137,32 +137,32 @@ def try_cast(value, value_type: ValueType) -> Tuple[Optional[Union[str, Dict]], 
     if value_type == ValueType.json:
         if value is None:
             v = None
-            return v, ValueType.of_value(v)
+            return v
         elif isinstance(value, str):
-            v = try_parse_json(value)
-            return v, ValueType.of_value(v)
+            v, parsed = try_parse_json(value)
+            return v
         elif isinstance(value, dict):
             v = value
-            return v, ValueType.of_value(v)
+            return v
 
     elif value_type == ValueType.string:
         if value is None:
-            return '', ValueType.string
+            return ''
         elif isinstance(value, str):
-            return value, ValueType.string
+            return value
         elif isinstance(value, dict):
-            return json.dumps(value), ValueType.string
+            return json.dumps(value)
 
     elif value_type == ValueType.none:
         if value is None:
-            return None, ValueType.none
+            return None
         elif isinstance(value, str):
-            return None, ValueType.none
+            return None
         elif isinstance(value, dict):
-            return None, ValueType.none
+            return None
 
 
-def to_string_or_none(value, value_type: ValueType) -> Tuple[Optional[str], ValueType]:
+def to_string_or_none(value, value_type: ValueType) -> Optional[str]:
     """
     Encode value to string
     :param value:
@@ -171,14 +171,15 @@ def to_string_or_none(value, value_type: ValueType) -> Tuple[Optional[str], Valu
     """
     if value_type == ValueType.json:
         if isinstance(value, dict):
-            return json.dumps(value), value_type
+            return json.dumps(value)
         if isinstance(value, list):
-            return json.dumps(value), value_type
-
+            return json.dumps(value)
+        if isinstance(value, str):
+            return json.dumps(value)
     elif value_type == ValueType.string:
-        return value, value_type
+        return value
     elif value_type == ValueType.none:
-        return value, value_type
+        return value
 
 
 class LogEntryController:
@@ -283,10 +284,10 @@ class LogEntryController:
 
 
 class PlaygroundApp:
-    fns: Dict[str, TextFunction]
+    fns: Dict[str, LmFunction]
 
     @staticmethod
-    def open(fn: TextFunction, name: Optional[str] = None, auto_run=True, **kwargs):
+    def open(fn: LmFunction, name: Optional[str] = None, auto_run=True, **kwargs):
         if name is None:
             name = fn.definition.name
             if name is None or name == '':
@@ -299,7 +300,7 @@ class PlaygroundApp:
         return app
 
     @staticmethod
-    def open_function_dict(fns: Dict[str, TextFunction], auto_run=True, **kwargs):
+    def open_function_dict(fns: Dict[str, LmFunction], auto_run=True, **kwargs):
         app = PlaygroundApp(fns)
         if auto_run:
             app.run(**kwargs)

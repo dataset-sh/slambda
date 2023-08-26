@@ -2,7 +2,7 @@ import json
 import os
 import importlib
 
-from slambda.core import TextFunction
+from slambda.core import LmFunction
 
 
 def list_scripts(base_dir, recursive=False):
@@ -105,7 +105,7 @@ def get_function(name):
     fns = []
     for item_name in dir(fn_module):
         item = getattr(fn_module, item_name)
-        if isinstance(item, TextFunction):
+        if isinstance(item, LmFunction):
             fns.append({
                 "name": item_name,
                 "template": item.definition.model_dump(mode='json', exclude_none=True)

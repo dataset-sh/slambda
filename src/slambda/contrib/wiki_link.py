@@ -1,4 +1,5 @@
-from slambda.core import Example, UnaryFunction, GptApiOptions
+from slambda.core import UnaryFunction
+from slambda import Example, GptApiOptions
 
 extract_wiki_links = UnaryFunction.from_instruction(
     instruction="Extract all wikipedia entities mention in the text.",

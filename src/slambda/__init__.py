@@ -1,2 +1,2 @@
-from .core import Definition, TextFunction, TextFunctionMode, Message, Role, Example, \
-    NullaryFunction, UnaryFunction, KeywordFunction, GptApiOptions
+from .core import LmFunction, Definition, Example
+from .gpt import Role, Message, GptApiOptions
