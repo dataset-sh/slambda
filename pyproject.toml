@@ -18,7 +18,7 @@ artifacts = [
 
 [project]
 name = "slambda"
-version = "0.0.11"
+version = "0.0.12"
 authors = [
     { name = "Hao Wu", email = "haowu@dataset.sh" },
 ]

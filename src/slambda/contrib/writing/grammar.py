@@ -1,6 +1,6 @@
-from slambda.core import Example, UnaryFunction
+from slambda import Example, LmFunction
 
-fix_grammar = UnaryFunction.from_instruction(
+fix_grammar = LmFunction.create(
     instruction="Fix grammar and spelling error for user",
     examples=[
         Example("I eat three applr yesteday.", "I ate three apples yesterday."),

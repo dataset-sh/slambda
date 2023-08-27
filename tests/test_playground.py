@@ -3,7 +3,7 @@ import unittest
 from datetime import datetime
 from unittest import TestCase
 
-from slambda.playground import LogEntryController, LogEntry, ValueType
+from slambda.playground import LogEntryController, LogEntry, ValueType, try_cast, to_string_or_none
 
 
 class TestLogEntryController(TestCase):
@@ -66,6 +66,40 @@ class TestLogEntryController(TestCase):
         cursor = self.conn.execute("SELECT COUNT(*) FROM log_entries;")
         count = cursor.fetchone()[0]
         self.assertEqual(count, 0)
+
+
+class TestCasting(TestCase):
+    def test_try_cast(self):
+        casted = try_cast(None, ValueType.json)
+        self.assertEqual(casted, None)
+
+        casted = try_cast("{}", ValueType.json)
+        self.assertEqual({}, casted)
+
+        casted = try_cast({}, ValueType.json)
+        self.assertEqual({}, casted)
+
+        casted = try_cast(None, ValueType.string)
+        self.assertEqual(casted, '')
+
+        casted = try_cast("{}", ValueType.string)
+        self.assertEqual('{}', casted)
+
+        casted = try_cast({}, ValueType.string)
+        self.assertEqual('{}', casted)
+
+        casted = try_cast(None, ValueType.none)
+        self.assertEqual(casted, None)
+
+        casted = try_cast("{}", ValueType.none)
+        self.assertEqual(casted, None)
+
+        casted = try_cast({}, ValueType.none)
+        self.assertEqual(casted, None)
+
+    def test_to_string_or_none(self):
+        v = to_string_or_none({}, ValueType.json)
+        self.assertEqual(v, '{}')
 
 
 if __name__ == '__main__':

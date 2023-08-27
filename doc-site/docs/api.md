@@ -1,11 +1,216 @@
 ---
 title: API Reference
+description: Slambda API reference
 sidebar_position: 4
 ---
 
 # API Reference
 
+## Core
+
+### LmOutputCastingError
+
 ```python
+class LmOutputCastingError(Exception):
+    """
+    This exception will be thrown if LM output cannot be parsed using `json.loads` and cast_to_json is True.
+    """
+
+    def __init__(self, llm_output, message="cannot cast language model output"):
+        """
+
+        :param llm_output: Text output of language model
+        :param message: error message
+        """
+        self.llm_output = llm_output
+        self.message = message
+        super().__init__(self.message)
+```
+
+### FunctionInputType
+
+```python
+class FunctionInputType(str, Enum):
+    """
+    TextFunctionMode control how a text function can be called.
+    """
+    KEYWORD = 'keyword'
+    """
+    KEYWORD allows calling with keyword arguments, e.g. f(a=10).
+    """
+    UNARY = 'unary'
+    """
+    UNARY allows calling with one positional argument1, e.g. f(10).
+    """
+```
+
+### Example
+
+```python
+
+FunctionInput = Union[str, Dict]
+FunctionOutput = Union[str, List, Dict]
+```
+
+```python
+
+class Example(BaseModel):
+    """
+    Input and output pair example.
+    The `input` field of `Example` can be one of `None`, a `str` value, or a `dict` object.
+    The `output` field of `Example` can be either a `str` value, a `dict`/`list` object.
+
+    If input is a dict, all value in input.values() must be able to render as a string with f-string i.e. `f"{value}"`.
+
+    Args:
+        input: `None`, a `str` value, or a `dict` object.
+        output: `str` value, or a `dict`/`list` object.
+    """
+    input: Optional[FunctionInput] = None
+    output: FunctionOutput
+```
+
+### FunctionInputConfig
+
+```python
+class FunctionInputConfig(BaseModel):
+    """
+    This class determine what kinds of input args is allowed for a function
+    Args:
+        input_type: Keyword or UNARY.
+        allow_none: True if None input is allowed.
+        strict_no_args: if True, the function will be a nullary function
+    """
+    input_type: FunctionInputType
+    allow_none: bool = False
+    strict_no_args: bool = False
+```
+
+### FunctionOutputConfig
+
+```python
+class FunctionOutputConfig(BaseModel):
+    """
+    This class determine what kinds of output should be returned for a function
+    Args:
+        cast_to_json: cast the output str as json.
+    """
+    cast_to_json: bool = False
+```
+
+### Definition
+
+```python
+class Definition(BaseModel):
+    """
+    Definition of a text function.
+
+    When executing the call, all message from init_messages will be appended to the message list, and then
+        * if no arguments is provided, the default message will be appended to the message list
+        * if positional argument is provided, all the positional arguments will be appended to the message list
+        * if keyword arguments is provided, message_template will be rendered and appended to the message list.
+
+    Args:
+        name: optional name of this template.
+        input_config: what call modes are allowed. See (TextFunctionMode)[#TextFunctionMode] for detail.
+        message_template: this message will be rendered with keyword arguments if kwargs are provided.
+        required_args: list of required keyword args.
+        examples: call examples.
+        gpt_opts: Inference parameters for ChatCompletion API.
+    """
+    instruction: str
+    examples: List[Example]
+
+    message_stack: List[Message]
+
+    input_config: FunctionInputConfig
+    output_config: FunctionOutputConfig
+
+    default_args: Optional[FunctionInput] = None
+
+    # For keyword functions
+    message_template: Optional[str] = None
+    required_args: Optional[List[str]] = None
+
+    # OpenAI parameters
+    gpt_opts: GptApiOptions = Field(default_factory=GptApiOptions)
+
+    name: Optional[str] = None
+```
+
+### LmFunction
+
+```python
+class LmFunction:
+    """
+    A text function that call be called, the preferred way to create such function is using one of
+    `NullaryFunction`, `UnaryFunction`, `KeywordFunction`.
+    """
+
+    RESERVED_KEYWORDS = ['return_json', 'extra_messages', '__override', 'return_resp_obj']
+    """
+    RESERVED_KEYWORDS: reserved keywords:
+    return_json: parse output as json.
+    extra_messages: extra messages to be carried over, it will be appended after init_messages from template but 
+                    before the final message
+    __override: any parameters to be override, currently you can override the following:
+                    * n
+                    * top_p
+                    * stream
+                    * stop
+                    * max_tokens
+                    * presence_penalty
+                    * frequency_penalty
+                    * logit_bias
+                    * user
+                (see here for details)[https://platform.openai.com/docs/api-reference/chat/create]
+    return_resp_obj: if set to true, the response from ChatCompletion API will be returned directly                
+    """
+
+    definition: Definition
+```
+
+### LmFunction.create
+
+```python
+class LmFunction:
+    @staticmethod
+    def create(
+            instruction: str,
+            examples: List[Example],
+
+            name: Optional[str] = None,
+            strict_no_args: Optional[bool] = None,
+
+            default_args: Optional[FunctionInput] = None,
+            message_template: Optional[str] = None,
+            required_args: Optional[List[str]] = None,
+            gpt_opts: Optional[GptApiOptions] = None,
+    ):
+        """
+        Create a LmFunction based on instruction and examples.
+
+        :param instruction: what will this function do.
+        :param examples: example input/output pairs.
+        :param name: an optional name of this function.
+        :param strict_no_args: if True, this function will be a nullary function, however, this value will be ignored
+                               if examples contain non-None input.
+        :param default_args: If this value is not None, this function can be called with no arguments, and
+                             the provided value will be used as default arguments instead.
+        :param message_template: this message will be rendered with keyword arguments if kwargs are provided.
+        :param required_args: list of required keyword args. If this value is missing and message_template is provided,
+                              we will calculate required_args based on message_template.
+        :param gpt_opts: inference parameters for ChatCompletion API.
+        :return: function created.
+        """
+
+```
+
+## OpenAI API Related 
+### Role
+```python
+
+
 class Role(str, Enum):
     """
     Role for chat message.
@@ -16,7 +221,7 @@ class Role(str, Enum):
     assistant = 'assistant'
     function = 'function'
 ```
-
+### Message
 ```python
 class Message(BaseModel):
     """Chat Model Message.
@@ -30,48 +235,7 @@ class Message(BaseModel):
     content: str
     name: Optional[str] = None
 ```
-
-```python
-class TextFunctionMode(str, Enum):
-    """
-    TextFunctionMode control how a text function can be called.
-    """
-    KEYWORD = 'keyword'
-    """
-    KEYWORD allows calling with keyword arguments, e.g. f(a=10).
-    """
-    POS = 'pos'
-    """
-    POS allows calling with positional arguments, e.g. f(10).
-    """
-    NO_ARGS = 'no_args'
-    """
-    NO_ARGS allows calling with no arguments, e.g. f().
-    """
-```
-
-```python
-class Example(BaseModel):
-    """
-    Input and output pair example.
-    The `input` field of `Example` can be one of `None`, a `str` value, or a `dict` object.
-
-    The `output` field of `Example` can be either a `str` value, or a `dict` object.
-
-    * For nullary function, the `input` field should be `None`.
-    * For unary function, the `input` field should be `string`. If `allow_no_arg` is `True`, it can also be `None`.
-    * For keyword function, the `input` field should be `dict`. If `allow_no_arg` is `True`, it can also be `None`.
-
-    If input is a dict, all value in input.values() must be able to render as a string with f-string i.e. `f"{value}"`.
-
-    Args:
-        input: `None`, a `str` value, or a `dict` object.
-        output: `str` value, or a `dict` object.
-    """
-    input: Optional[Union[Dict, str]] = None
-    output: Union[Dict, List, str] = None
-```
-
+### GptApiOptions
 ```python
 class GptApiOptions(BaseModel):
     """
@@ -102,221 +266,4 @@ class GptApiOptions(BaseModel):
     frequency_penalty: Optional[float] = None
     logit_bias: Optional[Dict[int, int]] = None
     user: Optional[str] = None
-```
-
-```python
-class Definition(BaseModel):
-    """
-    Definition of a text function.
-
-    When executing the call, all message from init_messages will be appended to the message list, and then
-        * if no arguments is provided, the default message will be appended to the message list
-        * if positional argument is provided, all the positional arguments will be appended to the message list
-        * if keyword arguments is provided, message_template will be rendered and appended to the message list.
-
-    Args:
-        name: optional name of this template.
-        description: an optional description for the template.
-        mode: what call modes are allowed. See (TextFunctionMode)[#TextFunctionMode] for detail.
-        init_messages: A list of messages comprising the conversation so far, this can be used for providing.
-        default_message: this message will be sent if no args are provided.
-        message_template: this message will be rendered with keyword arguments if kwargs are provided.
-        required_args: list of required keyword args.
-        json_output: if output is in json format or string.
-        examples: call examples.
-        gpt_opts: Inference parameters for ChatCompletion API.
-    """
-    # Template Information
-    name: Optional[str] = None
-    description: str = ''
-    mode: List[TextFunctionMode] = Field(default_factory=list)
-
-    # Message Config
-    init_messages: List[Message] = Field(default_factory=list)
-    default_message: Optional[str] = None
-    message_template: Optional[str] = None
-    required_args: Optional[List[str]] = None
-    json_output: bool = False
-
-    examples: List[Example] = Field(default_factory=list)
-
-    # OpenAI parameters
-    gpt_opts: GptApiOptions = Field(default_factory=GptApiOptions)
-```
-
-```python
-class TextFunction:
-    """
-    A text function that call be called, the preferred way to create such function is using one of
-    `NullaryFunction`, `UnaryFunction`, `KeywordFunction`.
-    """
-
-    RESERVED_KEYWORDS = ['return_json', 'extra_messages', '__override', 'return_resp_obj']
-    """
-    RESERVED_KEYWORDS: reserved keywords:
-    return_json: parse output as json.
-    extra_messages: extra messages to be carried over, it will be appended after init_messages from template but 
-                    before the final message
-    __override: any parameters to be override, currently you can override the following:
-                    * n
-                    * top_p
-                    * stream
-                    * stop
-                    * max_tokens
-                    * presence_penalty
-                    * frequency_penalty
-                    * logit_bias
-                    * user
-                (see here for details)[https://platform.openai.com/docs/api-reference/chat/create]
-    return_resp_obj: if set to true, the response from ChatCompletion API will be returned directly                
-    """
-
-    definition: Definition
-```
-
-```python
-def create_function(
-        instruction: str,
-        examples: Optional[List[Example]] = None,
-        gpt_opts: Optional[GptApiOptions] = None,
-
-        allow_no_arg: bool = False,
-        default_message: Optional[str] = None,
-
-        allow_pos: bool = False,
-
-        allow_keyword: bool = False,
-        message_template: Optional[str] = None,
-        required_args: Optional[List[str]] = None,
-
-        json_output=None,
-):
-    """
-    Create text function based on instruction and examples. We consider this to be an internal API and user should be
-    using one of `NullaryFunction`, `UnaryFunction`, `KeywordFunction` instead.
-
-    At least One of [allow_no_arg, allow_pos, allow_keyword] must be true, and allow_pos, allow_keyword cannot
-    both be true.
-
-    :param instruction: Describe what the function should do.
-    :param examples: Input/Output examples.
-    :param gpt_opts: Optional `GptApiOptions` to override the default inference parameters.
-    :param allow_no_arg: if True, this function call be called without any parameters.
-    :param default_message: if allow_no_arg, this message will be sent if no args are provided.
-    :param allow_pos: if True, this function will be a unary function.
-    :param allow_keyword: if True, this function will be a keyword function.
-    :param message_template: if message_template is provided, it will be used to render the out-going message by running
-                             `message_template.format(**kwargs)`.
-                             Otherwise, value of "\n".join([f"{k}: {v}" for k, v in kwargs.items()]) will be used.
-    :param required_args: list of required keyword args. If message_template is provided and required_args is None,
-                          we will try to figure out this value based on the given message_template.
-    :param json_output: if output is json or not. If this value is None, we will determine its value based on the
-                        examples.
-    :return: the defined function.
-    """
-```
-
-```python
-class NullaryFunction:
-    """
-    A function with no input argument.
-    """
-
-    def __init__(self):
-        raise ValueError('Use NullaryFunction.from_instruction')
-
-    @staticmethod
-    def from_instruction(
-            instruction: str,
-            examples: Optional[List[Example]] = None,
-            gpt_opts: Optional[GptApiOptions] = None,
-
-            default_message: Optional[str] = None,
-
-            json_output=None,
-    ):
-        """
-        Create a nullary function.
-
-        :param instruction: Describe what the function should do.
-        :param examples: Input/Output examples.
-        :param gpt_opts: Optional `GptApiOptions` to override the default inference parameters.
-        :param default_message:  this message will be sent if no args are provided, otherwise instruction will be
-                                 used as default_message.
-        :param json_output: if output is json or not. If this value is None, we will determine its value based on the
-                            examples.
-        :return:
-        """
-```
-
-```python
-class UnaryFunction:
-    """
-    A function with exactly one positional input argument.
-    """
-
-    def __init__(self):
-        raise ValueError('Use UnaryFunction.from_instruction')
-
-    @staticmethod
-    def from_instruction(
-            instruction: str,
-            examples: Optional[List[Example]] = None,
-            gpt_opts: Optional[GptApiOptions] = None,
-
-            allow_no_arg: bool = False,
-            default_message: Optional[str] = None,
-
-            json_output=None,
-    ):
-        """
-        Create a unary function.
-        :param instruction: Describe what the function should do.
-        :param examples: Input/Output examples.
-        :param gpt_opts: Optional `GptApiOptions` to override the default inference parameters.
-        :param allow_no_arg: if True, this function call be called without any parameters.
-        :param default_message: if allow_no_arg, this message will be sent if no args are provided.
-        :param json_output: if output is json or not. If this value is None, we will determine its value based on the
-                            examples.
-        :return:
-        """
-
-```
-
-```python
-class KeywordFunction:
-    """
-    A function with only keyword input arguments.
-    """
-
-    def __init__(self):
-        raise ValueError('Use KeywordFunction.from_instruction')
-
-    @staticmethod
-    def from_instruction(
-            instruction: str,
-            examples: Optional[List[Example]] = None,
-            gpt_opts: Optional[GptApiOptions] = None,
-
-            message_template: Optional[str] = None,
-
-            allow_no_arg: bool = False,
-            default_message: Optional[str] = None,
-
-            json_output=None,
-    ):
-        """
-        Create a keyword function.
-        :param instruction: Describe what the function should do.
-        :param examples: Input/Output examples.
-        :param gpt_opts: Optional `GptApiOptions` to override the default inference parameters.
-        :param message_template: if message_template is provided, it will be used to render the out-going message by running
-                                 `message_template.format(**kwargs)`.
-                                 Otherwise, value of "\n".join([f"{k}: {v}" for k, v in kwargs.items()]) will be used.
-        :param allow_no_arg: if True, this function call be called without any parameters.
-        :param default_message: if allow_no_arg, this message will be sent if no args are provided.
-        :param json_output: if output is json or not. If this value is None, we will determine its value based on the
-                            examples.
-        :return:
-        """
 ```

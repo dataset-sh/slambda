@@ -1,5 +1,6 @@
 ---
 title: Playground (Experimental)
+description: How to use Slambda Playground (Experimental)
 sidebar_position: 7
 ---
 
@@ -33,10 +34,14 @@ app.run()
 ```
 
 ```python title='Running a single function'
-from slambda import NullaryFunction, Example
+from slambda import LmFunction, Example
 from slambda.playground import PlaygroundApp
 
-hello_world_fn = NullaryFunction.from_instruction('print hello world', examples=[Example(output="hello world")])
+hello_world_fn = LmFunction.create(
+    'print hello world',
+    default_args='print hello world',
+    examples=[Example(output="hello world")]
+)
 
 app = PlaygroundApp.open(hello_world_fn)
 app.run()
