@@ -274,7 +274,6 @@ A unary function can only be called by a single string positional arguments, for
 from slambda import LmFunction, Example
 
 echo = LmFunction.create(
-    default_args="No input was given.",
     instruction='Repeat user input.',
     examples=[
         Example(
@@ -302,7 +301,6 @@ When provided with `default_args`, the unary function can also be called with no
 from slambda import LmFunction, Example
 
 echo = LmFunction.create(
-    default_args="No input was given.",
     instruction='Repeat user input.',
     examples=[
         Example(
@@ -315,6 +313,7 @@ echo = LmFunction.create(
             "Repeat user input", "Repeat user input"
         )
     ],
+    default_args="No input was given.", 
 )
 
 echo()  # This will success
