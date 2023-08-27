@@ -1,5 +1,4 @@
-from slambda.core import UnaryFunction
-from slambda import Example
+from slambda import Example, LmFunction
 
 examples = [
     Example(
@@ -11,7 +10,7 @@ examples = [
     )
 ]
 
-summarize = UnaryFunction.from_instruction(
+summarize = LmFunction.create(
     instruction='You are an assistant that summarize user input.',
     examples=examples
 )

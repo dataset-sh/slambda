@@ -64,7 +64,7 @@ openai.api_key = "sk-ThIsIsAFaKeKEY12345678990...."
 
 ## Define your own functions
 
-`sLambda` will help you implement common NLP tasks using OpenAI's ChatCompletion api, including but not limit to
+`sLambda` will help you implement common NLP tasks using OpenAI's ChatCompletion api, including but not limited to
 
 * extraction
     * named entity
@@ -84,21 +84,31 @@ openai.api_key = "sk-ThIsIsAFaKeKEY12345678990...."
 
 In order to implement your function, All you need to do is the following steps:
 
-1. Choose your [function arity](https://en.wikipedia.org/wiki/Arity)
-    * if your function take no input argument, you should use `NullaryFunction`.
-    * if your function will receive one string input argument, you should use `UnaryFunction`.
-    * if your function will receive multiple string input arguments, you should use `KeywordFunction`.
-2. Write an instruction about your task
-3. Provide several example using `slambda.Example` class.
+1. Write an instruction about your task
+2. Provide several example using `slambda.Example` class.
+
+```python title='Example: Hello World'
+from slambda import Example, LmFunction, GptApiOptions
+
+hello_world = LmFunction.create(
+    instruction="Print Hello World",
+    examples=[
+        Example(output="Hello World")
+    ],
+    gpt_opts=GptApiOptions(temperature=0),
+    default_args="Print Hello World"
+)
+
+hello_world()
+# Output: Hello World
+```
+
 
 ```python title='Example: Named Entity Recognition'
-from slambda import Example, UnaryFunction, GptApiOptions
+from slambda import Example, LmFunction, GptApiOptions
 
-# 1. Arity
-find_tickers = UnaryFunction.from_instruction(
-    # 2. Instruction
-    instruction="Extract all companies' name mention in the news title.",
-    # 3. Examples
+extract_entities = LmFunction.create(
+    instruction="Extract all companies' name mentioned in the news title.",
     examples=[
         Example(input="Why Kroger, Albertsons need to merge immediately to compete with Walmart",
                 output="Kroger, Albertsons, Walmart")
@@ -106,17 +116,17 @@ find_tickers = UnaryFunction.from_instruction(
     gpt_opts=GptApiOptions(temperature=0)
 )
 
-find_tickers("TriNet Group, Inc. Commences a Fixed Price Tender Offer to Repurchase up to 5,981,308 Shares")
+extract_entities("TriNet Group, Inc. Commences a Fixed Price Tender Offer to Repurchase up to 5,981,308 Shares")
 # Output: TriNet Group, Inc.
 ```
 
 ### Extraction
 
 ```python title="Extract Stock Tickers"
-from slambda import Example, UnaryFunction, GptApiOptions
+from slambda import Example, LmFunction, GptApiOptions
 
-find_tickers = UnaryFunction.from_instruction(
-    instruction="Extract all companies' tickers mention in the news title.",
+find_tickers = LmFunction.create(
+    instruction="Extract all companies' tickers mentioned in the news title.",
     examples=[
         Example(
             input="Why Kroger, Albertsons need to merge immediately to compete with Walmart",
@@ -131,10 +141,10 @@ find_tickers("These Stocks Are Moving the Most Today: Keysight, Farfetch, XPeng,
 ```
 
 ```python title="Extract Wikipeida Links"
-from slambda import Example, UnaryFunction, GptApiOptions
+from slambda import Example, LmFunction, GptApiOptions
 
-extract_wiki_links = UnaryFunction.from_instruction(
-    instruction="Extract all wikipedia entities mention in the text.",
+extract_wiki_links = LmFunction.create(
+    instruction="Extract all wikipedia entities mentioned in the text and format them in JSON as following [{name: '', url: ''}].",
     examples=[
         Example(
             input="An analog computer or analogue computer is a type of computer that uses the continuous variation"
@@ -185,9 +195,9 @@ extract_wiki_links(
 ### Generation
 
 ```python title="Grammar and Spelling Error Correction"
-from slambda import Example, UnaryFunction
+from slambda import Example, LmFunction
 
-fix_grammar = UnaryFunction.from_instruction(
+fix_grammar = LmFunction.create(
     instruction="Fix grammar and spelling errors for user",
     examples=[
         Example(
@@ -204,16 +214,16 @@ fix_grammar(
 ```
 
 ```python title="Generate Essay"
-from slambda import Example, KeywordFunction
+from slambda import Example, LmFunction
 
-generate_essay = KeywordFunction.from_instruction(
+generate_essay = LmFunction.from_instruction(
     instruction="Write an grad school application essay about 250 words using the given information",
     examples=[
         Example(
             input={
                 "title": " Why I want to apply for master degree in computer science",
                 "work_experience": "electrician, financial analyst",
-                "education_experience": "Bachelor degree in english", 
+                "education_experience": "Bachelor degree in english",
                 # simple typo such as bachelor (should be bachelor’s) should normally be ok. 
             },
             output="""
@@ -263,9 +273,9 @@ generate_essay(
 ### Classification
 
 ```python title="Binary Sentiment Classifier"
-from slambda import Example, UnaryFunction, GptApiOptions
+from slambda import Example, LmFunction, GptApiOptions
 
-sentiment = UnaryFunction.from_instruction(
+sentiment = LmFunction.create(
     instruction='Detect sentiment of the given text, answer positive for positive sentiment, negative for negative sentiment, otherwise neutral.',
     examples=[
         Example(

@@ -1,9 +1,64 @@
 import axios from "axios";
 import React from 'react';
 
+
+type Role = 'system' | 'user' | 'assistant' | 'function'
+type Message = {
+    role: Role
+    content: string
+    name?: string
+}
+
+type Example = {
+    input: string | Record<string, string> | null
+    output: string | Record<string, string>
+}
+
+type FunctionInputType = 'keyword' | 'unary'
+
+type InputConfig = {
+    input_type: FunctionInputType
+    allow_none: boolean
+    strict_no_args: boolean
+}
+
+type OutputConfig = {
+    cast_to_json: boolean
+}
+
+type TextFnTemplateType = {
+    instruction: string
+    examples: Example[]
+
+    message_stack: Message[]
+
+    input_config: InputConfig
+    output_config: OutputConfig
+
+    default_args?: string
+
+    message_template?: string
+    required_args?: string[]
+
+    name?: string
+    gpt_opts: {
+        model?: string,
+        temperature?: number
+        n?: number
+        top_p?: number
+        stream?: boolean
+        stop?: string | string[]
+        max_tokens?: number
+        presence_penalty?: number
+        frequency_penalty?: number
+        logit_bias?: Record<number, number>
+        user?: string
+    }
+}
+
 export type NamedDefinition = {
     name: string
-    definition: any
+    definition: TextFnTemplateType
 }
 
 export type ServerStatus = {
@@ -12,6 +67,7 @@ export type ServerStatus = {
 }
 
 export type FnResult = {
+    type: ValueType
     value: string | any
 }
 

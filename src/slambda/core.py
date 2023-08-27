@@ -17,10 +17,15 @@ FunctionOutput = Union[str, List, Dict]
 
 class LmOutputCastingError(Exception):
     """
-    This exception will be thrown if LM output cannot be parsed using `json.loads`
+    This exception will be thrown if LM output cannot be parsed using `json.loads` and cast_to_json is True.
     """
 
     def __init__(self, llm_output, message="cannot cast language model output"):
+        """
+
+        :param llm_output: Text output of language model
+        :param message: error message
+        """
         self.llm_output = llm_output
         self.message = message
         super().__init__(self.message)
@@ -61,7 +66,7 @@ class FunctionInputConfig(BaseModel):
     Args:
         input_type: Keyword or UNARY.
         allow_none: True if None input is allowed.
-        strict_no_args: if True, the function will be a strict nullary function
+        strict_no_args: if True, the function will be a nullary function
     """
     input_type: FunctionInputType
     allow_none: bool = False
@@ -113,18 +118,13 @@ class Example(BaseModel):
     """
     Input and output pair example.
     The `input` field of `Example` can be one of `None`, a `str` value, or a `dict` object.
-
-    The `output` field of `Example` can be either a `str` value, or a `dict` object.
-
-    * For nullary function, the `input` field should be `None`.
-    * For unary function, the `input` field should be `string`. If `allow_no_arg` is `True`, it can also be `None`.
-    * For keyword function, the `input` field should be `dict`. If `allow_no_arg` is `True`, it can also be `None`.
+    The `output` field of `Example` can be either a `str` value, a `dict`/`list` object.
 
     If input is a dict, all value in input.values() must be able to render as a string with f-string i.e. `f"{value}"`.
 
     Args:
         input: `None`, a `str` value, or a `dict` object.
-        output: `str` value, or a `dict` object.
+        output: `str` value, or a `dict`/`list` object.
     """
     input: Optional[FunctionInput] = None
     output: FunctionOutput
@@ -262,20 +262,22 @@ class OutputCounter:
 
 class Definition(BaseModel):
     """
-    Definition of a text function.
 
-    When executing the call, all message from init_messages will be appended to the message list, and then
-        * if no arguments is provided, the default message will be appended to the message list
-        * if positional argument is provided, all the positional arguments will be appended to the message list
-        * if keyword arguments is provided, message_template will be rendered and appended to the message list.
+    Definition of a LmFunction, this should be created using LmFunction.create function.
 
     Args:
-        name: optional name of this template.
-        input_config: what call modes are allowed. See (TextFunctionMode)[#TextFunctionMode] for detail.
+        instruction: what will this function do.
+        examples: example input/output pairs.
+        name: an optional name of this function.
+        message_stack: created message stack to be sent to ChatCompletion API.
+        input_config: this determine what input arguments are allowed
+        output_config: this determine if the output of this function is a string or json object.
+        default_args: If this value is not None, this function can be called with no arguments, and
+                      the provided value will be used as default arguments instead.
         message_template: this message will be rendered with keyword arguments if kwargs are provided.
-        required_args: list of required keyword args.
-        examples: call examples.
-        gpt_opts: Inference parameters for ChatCompletion API.
+        required_args: list of required keyword args. If this value is missing and message_template is provided,
+                       we will calculate required_args based on message_template.
+        gpt_opts: inference parameters for ChatCompletion API.
     """
     instruction: str
     examples: List[Example]
@@ -471,6 +473,22 @@ class LmFunction:
             required_args: Optional[List[str]] = None,
             gpt_opts: Optional[GptApiOptions] = None,
     ):
+        """
+        Create a LmFunction based on instruction and examples.
+
+        :param instruction: what will this function do.
+        :param examples: example input/output pairs.
+        :param name: an optional name of this function.
+        :param strict_no_args: if True, this function will be a nullary function, however, this value will be ignored
+                               if examples contains non-None input.
+        :param default_args: If this value is not None, this function can be called with no arguments, and
+                             the provided value will be used as default arguments instead.
+        :param message_template: this message will be rendered with keyword arguments if kwargs are provided.
+        :param required_args: list of required keyword args. If this value is missing and message_template is provided,
+                              we will calculate required_args based on message_template.
+        :param gpt_opts: inference parameters for ChatCompletion API.
+        :return: function created.
+        """
 
         (fn_input_type, fn_output_type) = Definition.detect_input_output_type(
             examples,
@@ -521,7 +539,6 @@ class LmFunction:
         """
         Execute the function call based on the provided template
 
-        :param template:
         :param args:
         :param kwargs:
         :return:

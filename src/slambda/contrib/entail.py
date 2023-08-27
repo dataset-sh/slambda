@@ -1,4 +1,4 @@
-from slambda import KeywordFunction, Example, GptApiOptions
+from slambda import LmFunction, Example, GptApiOptions
 
 examples = [
     Example(
@@ -10,7 +10,7 @@ examples = [
     )
 ]
  
-entail = KeywordFunction.from_instruction(
+entail = LmFunction.create(
     instruction='Answer true if premise entail hypothesis, false otherwise.',
     examples=examples,
     message_template="premise: {premise}\nhypothesis: {hypothesis}",

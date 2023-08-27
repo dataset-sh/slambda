@@ -68,7 +68,7 @@ export function CopyableOutput({value, title}: { value: string, title?: string }
             }}>
                 <Typography
                     sx={{
-                        whiteSpace: 'pre-line'
+                        whiteSpace: 'pre-wrap'
                     }}
                 >
                     {value}

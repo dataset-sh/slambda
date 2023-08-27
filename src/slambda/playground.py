@@ -1,6 +1,7 @@
 import datetime
 import importlib
 import json
+import os
 import sqlite3
 import uuid
 import zipfile
@@ -55,6 +56,8 @@ class ValueType(str, Enum):
         elif isinstance(value, str):
             return ValueType.string
         elif isinstance(value, dict):
+            return ValueType.json
+        elif isinstance(value, list):
             return ValueType.json
 
 
@@ -390,5 +393,7 @@ class PlaygroundApp:
 
 
 if __name__ == '__main__':
+    openai.api_key_path = os.path.expanduser('~/.openai.key')
+
     app = PlaygroundApp()
     app.run()

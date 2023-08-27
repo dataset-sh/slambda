@@ -1,4 +1,4 @@
-import {Box, Card, Chip, Typography} from "@mui/material"
+import {Box, Card, Chip, Typography, Divider} from "@mui/material"
 import React from "react"
 import _ from "lodash"
 import CodeBlock from '@theme/CodeBlock';
@@ -13,20 +13,22 @@ type Message = {
 
 type Example = {
     input: string | Record<string, string> | null
-    output
+    output: string | Record<string, string>
 }
 
-type TextFunctionMode = 'keyword' | 'pos' | 'no_args'
-type TextFnTemplateType = {
-    name?: string
-    description?: string
-    mode: TextFunctionMode[]
-    examples: Example[]
+type FunctionInputType = 'keyword' | 'unary'
 
-    init_messages: Message[]
-    default_message?: string
-    message_template?: string
+type InputConfig = {
+    input_type: FunctionInputType
+    allow_none: boolean
+    strict_no_args: boolean
+}
 
+type OutputConfig = {
+    cast_to_json: boolean
+}
+
+type GptParameters = {
     model?: string,
     temperature?: number
     n?: number
@@ -38,7 +40,36 @@ type TextFnTemplateType = {
     frequency_penalty?: number
     logit_bias?: Record<number, number>
     user?: string
+}
 
+type TextFnTemplateType = {
+    instruction: string
+    examples: Example[]
+
+    message_stack: Message[]
+
+    input_config: InputConfig
+    output_config: OutputConfig
+
+    default_args?: string
+
+    message_template?: string
+    required_args?: string[]
+
+    name?: string
+    gpt_opts: {
+        model?: string,
+        temperature?: number
+        n?: number
+        top_p?: number
+        stream?: boolean
+        stop?: string | string[]
+        max_tokens?: number
+        presence_penalty?: number
+        frequency_penalty?: number
+        logit_bias?: Record<number, number>
+        user?: string
+    }
 }
 
 type TextFnModuleType = {
@@ -57,24 +88,44 @@ export function TextFnModuleView({
     return <Box>
         {
             _.map(fns, ({template, name}) => {
-                return <TextFnTemplateView template={template} name={name} module_name={module_name} key={name}/>
+                return <React.Fragment key={name}>
+                    <TextFnTemplateView template={template} name={name} module_name={module_name}/>
+                    <Divider sx={{mb: 6, mt: 8}}/>
+                </React.Fragment>
             })
         }
     </Box>
 }
 
-export function ExeModeBadge({
-                                 mode
-                             }: { mode: TextFunctionMode }) {
-    switch (mode) {
-        case "keyword":
-            return <Chip label={'Keyword'} sx={{bgcolor: purple[50]}}/>
-        case "pos":
-            return <Chip label={'Unary'} sx={{bgcolor: red[50]}}/>
-        case "no_args":
-            return <Chip label={'Nullary'} sx={{bgcolor: orange[50]}}/>
+export function InputConfigView({
+                                    inputConfig
+                                }: { inputConfig: InputConfig }) {
+
+    if (inputConfig.allow_none && inputConfig.strict_no_args) {
+        return <>
+            <Typography component={'span'}>
+                This function can only be called with
+            </Typography> <Chip label={'NO ARGUMENTS'}/>
+        </>
+    } else {
+        switch (inputConfig.input_type) {
+            case "keyword":
+                return <>
+                    <Typography component={'span'}>
+                        This function can be called with
+                    </Typography> <Chip label={'KEYWORD ARGUMENTS'}/> {inputConfig.allow_none &&
+                    <Chip label={'NO ARGUMENTS'}/>}
+                </>
+            case "unary":
+                return <>
+                    <Typography component={'span'}>
+                        This function can be called with
+                    </Typography> <Chip label={'POSITIONAL ARGUMENTS'}/> {inputConfig.allow_none &&
+                    <Chip label={'NO ARGUMENTS'}/>}
+                </>
+        }
     }
-    return <Chip label={mode}/>
+
 }
 
 function exampleInputToPyStr(input: string | Record<string, string> | null) {
@@ -90,7 +141,10 @@ function exampleInputToPyStr(input: string | Record<string, string> | null) {
     }
 }
 
-function formatOutputAsPyComment(output: string) {
+function formatOutputAsPyComment(output: string | Record<string, any>) {
+    if (!(typeof output === 'string')) {
+        output = JSON.stringify(output)
+    }
     const lines = output.split("\n");
     return "# Output:\n" + _.join(
         lines.map((line, idx) => {
@@ -113,8 +167,13 @@ export function TextFnTemplateView({
     }).join("\n")
 
     return <Box>
+        <Box>
+            <Typography variant="h4" sx={{mb: 2}}>
+                Function: {name}
+            </Typography>
+        </Box>
         <Box sx={{bgcolor: grey[50]}}>
-            {template.description && <Typography>{template.description}</Typography>}
+            {template.instruction && <Typography>{template.instruction}</Typography>}
         </Box>
         <CodeBlock title={'Usage'} language="py">
             {importExample}
@@ -124,21 +183,30 @@ export function TextFnTemplateView({
             <Typography
                 sx={{mb: 1}}
                 fontWeight={'bold'}
-            >Execution Mode: </Typography>
-            {template.mode.map(mode => {
-                return <ExeModeBadge key={mode} mode={mode}/>
-            })}
+            >Input Config: </Typography>
+            <InputConfigView inputConfig={template.input_config}/>
+            <Box>
+                <Typography
+                    sx={{mb: 1, mt: 1}}
+                    fontWeight={'bold'}
+                >Output Config: </Typography>
+                <Typography
+                    component={'span'}
+                    sx={{mb: 1}}
+                >Return format
+                </Typography> {template.output_config.cast_to_json ? <Chip label={'JSON'}/> : <Chip label={'STRING'}/>}.
+            </Box>
         </Box>
-        {template.default_message && <CodeBlock title={'Default Message'}>{template.default_message}</CodeBlock>}
+        {template.default_args && <CodeBlock title={'Default Message'}>{template.default_args}</CodeBlock>}
         {template.message_template && <CodeBlock title={'Message Template'}>{template.message_template}</CodeBlock>}
         <Box>
 
             <Typography
                 sx={{mb: 1}}
                 fontWeight={'bold'}
-            >Init Messages: </Typography>
+            >Message List: </Typography>
             <Box sx={{ml: 4}}>
-                {template.init_messages.map(msg => {
+                {template.message_stack.map(msg => {
                     return <MessageView {...msg} />
                 })}
             </Box>

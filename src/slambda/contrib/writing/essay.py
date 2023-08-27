@@ -1,7 +1,6 @@
-from slambda.core import KeywordFunction
-from slambda import Example
+from slambda import Example, LmFunction
 
-generate_essay = KeywordFunction.from_instruction(
+generate_essay = LmFunction.create(
     instruction="Write an grad school application essay about 250 words using the given information",
     examples=[
         Example({
