@@ -13,9 +13,8 @@ You can enable code block warp in this guide by clicking this button
 
 ## Concepts
 
-In sLambda, functions are defined by instruction and examples. This library can create a normal python function using only a natural
-language instruction, a set of
-example input/output pairs. For example:
+In sLambda, functions are defined by instruction and examples. This library can create a normal python function using
+only a natural language instruction, and a set of example input/output pairs. For example:
 
 ```python
 from slambda import Example, LmFunction
@@ -95,7 +94,8 @@ logic.
 But instead of writing python statements inside the function body as the transformation logic, we use **Instruction**
 and **Example** to create such logic.
 
-Instruction and Examples will be translated into ChatCompletion API call automatically with a similar implementation of this [OpenAI cookbook](https://github.com/openai/openai-cookbook/blob/main/examples/How_to_format_inputs_to_ChatGPT_models.ipynb).
+Instruction and Examples will be translated into ChatCompletion API call automatically with a similar implementation of
+this [OpenAI cookbook](https://github.com/openai/openai-cookbook/blob/main/examples/How_to_format_inputs_to_ChatGPT_models.ipynb).
 
 #### Input
 
@@ -117,11 +117,10 @@ However, if `default_args` are provided, you can mix `None` input with positiona
 If you provided dict/list output in your examples, the output of the resulting function will also be parsed
 automatically.
 
-However, due to the limitation of the current Language Models, we can not guarantee its output will always be in valid json format.
-
-
-If we cannot parse the output, an `LmOutputCastingError` will be thrown, and you can access the raw language model output
-from it.
+However, due to the limitation of the current Language Models, we can not guarantee its output will always be in valid
+json format.If we cannot parse the output, an `LmOutputCastingError` will be thrown, and you can access the raw language
+model
+output from it.
 
 All examples provided to a single function must share the same output format.
 
@@ -156,38 +155,6 @@ LmFunction.create(
 * **gpt_opts**: inference parameters for ChatCompletion API.
 
 #### Common Patterns
-
-##### Json Output
-
-If you provide `dict` or `list` in your examples, the output of this function will be automatically parsed using `json.loads`, for example:
-
-```python title="Enable JSON Output"
-from slambda import Example, LmFunction, GptApiOptions
-
-extract_entities = LmFunction.create(
-    instruction="Extract all companies' name mention in the news title.",
-    examples=[
-        Example(input="Why Kroger, Albertsons need to merge immediately to compete with Walmart",
-                output=[
-                    "Kroger",
-                    "Albertsons",
-                    "Walmart"
-                ])
-    ],
-    gpt_opts=GptApiOptions(temperature=0)
-)
-["TriNet Group, Inc."] == extract_entities(
-    "TriNet Group, Inc. Commences a Fixed Price Tender Offer to Repurchase up to 5,981,308 Shares")
-# Output: True
-```
-
-```python title="Catching LLMOutputCastingError"
-try:
-    out = f("some input")
-except LLMOutputCastingError as e:
-    print(e.llm_output)
-    # This is the original language model output value.
-```
 
 ##### Keyword Function
 
@@ -288,7 +255,7 @@ echo = LmFunction.create(
     ],
 )
 
-echo('hello world')  
+echo('hello world')
 # Output: hello world
 
 ```
@@ -313,12 +280,12 @@ echo = LmFunction.create(
             "Repeat user input", "Repeat user input"
         )
     ],
-    default_args="No input was given.", 
+    default_args="No input was given.",
 )
 
 echo()  # This will success
 # Output: No input was given.
-echo('hello world')  
+echo('hello world')
 # Output: hello world
 
 ```
@@ -341,19 +308,40 @@ motivate_me = LmFunction.create(
     strict_no_args=True,
 )
 
-motivate_me() # This will success
+motivate_me()  # This will success
 
-motivate_me('hello') # This will throw exception
+motivate_me('hello')  # This will throw exception
 
 ```
 
 ## Tips
 
-### Json Output
+##### Json Output
 
-By providing Example with `dict`/`list` output, and `json_output=True`, you can make you function return a `dict`.
+If you provide `dict` or `list` in your examples, the output of this function will be automatically parsed
+using `json.loads`, for example:
 
-```python
+```python title="Enable JSON Output"
+from slambda import Example, LmFunction, GptApiOptions
+
+extract_entities = LmFunction.create(
+    instruction="Extract all companies' name mention in the news title.",
+    examples=[
+        Example(input="Why Kroger, Albertsons need to merge immediately to compete with Walmart",
+                output=[
+                    "Kroger",
+                    "Albertsons",
+                    "Walmart"
+                ])
+    ],
+    gpt_opts=GptApiOptions(temperature=0)
+)
+["TriNet Group, Inc."] == extract_entities(
+    "TriNet Group, Inc. Commences a Fixed Price Tender Offer to Repurchase up to 5,981,308 Shares")
+# Output: True
+```
+
+```python title="Enable JSON Output"
 from slambda import Example, LmFunction, GptApiOptions
 
 find_tickers = LmFunction.create(
@@ -373,8 +361,17 @@ find_tickers("These Stocks Are Moving the Most Today: Keysight, Farfetch, XPeng,
 # Output: {'tickers': ['KEYS', 'FTCH', 'XPEV', 'TSLA', 'DE']}
 ```
 
-However, LLM will some time generate syntactically incorrect json, in that case, the function will return string
-instead.
+However, due to the limitation of the current Language Models, we can not guarantee its output will always be in valid
+json format. If we cannot parse the output, a LmOutputCastingError will be thrown, and you can access the raw language
+model output from it.
+
+```python title="Catching LLMOutputCastingError"
+try:
+    out = f("some input")
+except LLMOutputCastingError as e:
+    print(e.llm_output)
+    # This is the original language model output value.
+```
 
 ### Controlling Inference Parameters
 
