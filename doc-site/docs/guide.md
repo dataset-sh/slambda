@@ -14,9 +14,7 @@ You can enable code block warp in this guide by clicking this button
 ## Concepts
 
 In sLambda, functions are defined by instruction and examples. This library can create a normal python function using
-only a natural
-language instruction, a set of
-example input/output pairs. For example:
+only a natural language instruction, and a set of example input/output pairs. For example:
 
 ```python
 from slambda import Example, LmFunction
