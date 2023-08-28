@@ -316,7 +316,7 @@ motivate_me('hello')  # This will throw exception
 
 ## Tips
 
-##### Json Output
+#### Enabling JSON Output
 
 If you provide `dict` or `list` in your examples, the output of this function will be automatically parsed
 using `json.loads`, for example:
@@ -325,7 +325,7 @@ using `json.loads`, for example:
 from slambda import Example, LmFunction, GptApiOptions
 
 extract_entities = LmFunction.create(
-    instruction="Extract all companies' name mention in the news title.",
+    instruction="Extract all companies' name mentioned in the news title.",
     examples=[
         Example(input="Why Kroger, Albertsons need to merge immediately to compete with Walmart",
                 output=[
@@ -345,7 +345,7 @@ extract_entities = LmFunction.create(
 from slambda import Example, LmFunction, GptApiOptions
 
 find_tickers = LmFunction.create(
-    instruction="Extract all companies' tickers mention in the news title.",
+    instruction="Extract all companies' tickers mentioned in the news title.",
     examples=[
         Example(
             input="Why Kroger, Albertsons need to merge immediately to compete with Walmart",
