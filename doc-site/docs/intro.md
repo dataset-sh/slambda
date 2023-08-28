@@ -13,7 +13,8 @@ You can enable code block warp in this guide by clicking this button
 
 ## What does slambda do?
 
-We turn instruction and examples into plain python function powered by LLM.
+Integrating language model such as GPT into your code can be a difficult process. With sLambda, we help you turn
+natural language instructions and examples into **standard python functions** powered by language model.
 
 ## Install
 
@@ -102,7 +103,6 @@ hello_world = LmFunction.create(
 hello_world()
 # Output: Hello World
 ```
-
 
 ```python title='Example: Named Entity Recognition'
 from slambda import Example, LmFunction, GptApiOptions
