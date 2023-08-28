@@ -18,7 +18,7 @@ artifacts = [
 
 [project]
 name = "slambda"
-version = "0.0.12"
+version = "0.0.post12"
 authors = [
     { name = "Hao Wu", email = "haowu@dataset.sh" },
 ]
@@ -33,8 +33,8 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Information Analysis"
 ]
 dependencies = [
-    "pydantic = ^2",
-    "flask = '^2'",
+    'pydantic>=2.0.0,<3.0.0',
+    'flask>=2.0.0,<3.0.0',
     "openai"
 ]
 license = { text = "MIT License" }
