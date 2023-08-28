@@ -197,7 +197,7 @@ example: `f(k="some value")`, `f(k="some value", k2="value2"")`
 ```python
 from slambda import Example, LmFunction
 
-generate_essay = LmFunction.from_instruction(
+generate_essay = LmFunction.create(
     instruction="Write an grad school application essay about 250 words using the given information",
     examples=[
         Example(
@@ -233,7 +233,7 @@ When provided with `default_args`, the keyword function can also be called with 
 ```python
 from slambda import Example, LmFunction
 
-generate_essay = LmFunction.from_instruction(
+generate_essay = LmFunction.create(
     instruction="Write an grad school application essay about 250 words using the given information",
     examples=[
         Example(

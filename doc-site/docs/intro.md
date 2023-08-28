@@ -216,7 +216,7 @@ fix_grammar(
 ```python title="Generate Essay"
 from slambda import Example, LmFunction
 
-generate_essay = LmFunction.from_instruction(
+generate_essay = LmFunction.create(
     instruction="Write an grad school application essay about 250 words using the given information",
     examples=[
         Example(
