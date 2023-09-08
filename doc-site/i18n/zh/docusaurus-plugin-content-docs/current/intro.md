@@ -1,38 +1,36 @@
 ---
-title: Getting Started
-description: Getting Started With Slambda
+title: 开始使用 slambda
+description: 开始使用 slambda
 sidebar_position: 1
 ---
 
-# Getting Started
+# 开始使用 slambda
 
 :::tip
-You can enable code block warp in this guide by clicking this button
+你可以通过点击此按钮在这个指南中启用代码展开（Code Block Warp Button）功能。
 ![Code Block Warp Button](/img/code-block-wrap-button.png)
 :::
 
-## What does slambda do?
+## sLambda 是做什么的？
 
-Integrating language model such as GPT into your code can be a difficult process. sLambda simplifies the process by 
-translating natural language instructions and examples into ready-to-use **Python functions**.
+将语言模型（如 GPT）集成到您的代码中可能是一个复杂的过程。通过 sLambda，我们帮助您将自然语言指令和示例转化为由语言模型实现的**python函数**。
 
-## Install
+## 安装
 
 ```bash
 pip install slambda
 ```
 
-## Prerequisite
+## 需要什么
 
-Currently, sLambda only supports OpenAI's ChatCompletion API, so you will need an OpenAI API key in order to use this
-package.
+目前，sLambda 仅支持 OpenAI 的 ChatCompletion API，因此您需要一个 OpenAI API 密钥才能使用。
 
-<details><summary>How to load OpenAI API Key</summary>
+<details><summary>如何加载OpenAI API Key</summary>
 
-Please check [OpenAI's documentation: Authentication](https://platform.openai.com/docs/api-reference/authentication) if
-you need to create a new API key.  [Create an OpenAI API Key Here](https://platform.openai.com/account/api-keys).
+如果您需要创建新的 API 密钥，请查看 OpenAI 的身份验证文档[OpenAI's documentation: Authentication](https://platform.openai.com/docs/api-reference/authentication) if
+您可以参考创建 OpenAI API 密钥：[Create an OpenAI API Key Here](https://platform.openai.com/account/api-keys).
 
-If you have encountered this error:
+如果您遇到了这个错误:
 
 ```
 AuthenticationError: No API key provided. You can set your API key in code using 'openai.api_key = <API-KEY>', 
@@ -41,14 +39,13 @@ you can point the openai module at it with 'openai.api_key_path = <PATH>'. You c
 interface. See https://platform.openai.com/account/api-keys for details.
 ```
 
-It means that you need to supply `OPENAI_API_KEY` somewhere in your code. Check out our guide
-on [Loading API key](/docs/tips/apikey) for best practices.
+这意味着您需要在代码中提供 `OPENAI_API_KEY`。请查看我们的指南[Loading API key](/docs/tips/apikey)了解关于加载 API 密钥的最佳实践。
 
 ```python
 import os
 import openai
 
-# We highly recommend you to load OPENAI_API_KEY via environmental variable 
+# 我们强烈建议您通过环境变量加载 OPENAI_API_KEY
 
 if not os.getenv("OPENAI_API_KEY"):
     print(
@@ -58,41 +55,41 @@ if not os.getenv("OPENAI_API_KEY"):
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# ---------or---------
+# ---------或者---------
 
-# You can also do it by providing value directly
+# 您还可以直接提供值进行设置
 openai.api_key = "sk-ThIsIsAFaKeKEY12345678990...."
-# But we consider to be a security risk, please read our guide on how to load api key for more details. 
+# 但我们认为这可能会带来安全风险，请阅读我们的指南以了解如何加载 API 密钥的更多细节。
 ```
-
 </details>
 
-## Define your own functions
 
-`sLambda` will help you implement common NLP tasks using OpenAI's ChatCompletion api, including but not limited to
+## 定义您自己的Python函数
 
-* extraction
-    * named entity
-    * events
-    * relation
-    * ...
-* classification
-    * sentiment
-    * topic
-    * ...
-* generation
-    * summarization
-    * paraphrasing
-    * translation
-    * essay writing
-    * ...
+`sLambda` 将帮助您使用 OpenAI 的 ChatCompletion API 实现常见的自然语言处理（NLP）任务，包括但不限于：
 
-In order to implement your function, All you need to do is the following steps:
+* 信息提取
+  * 命名实体识别
+  * 事件提取
+  * 关系提取
+  * ...
+* 分类
+  * 情感分析
+  * 主题分类
+  * ...
+* 生成
+  * 文本摘要总结
+  * 重述
+  * 翻译
+  * 写作文章
+  * ...
 
-1. Write an instruction about your task
-2. Provide several example using `slambda.Example` class.
+为了实现您的function（函数），您只需要按照以下步骤进行操作：
 
-```python title='Example: Hello World'
+1. 编写关于您任务的instruction（指令）
+2. 使用 `slambda.Example` 类提供一些example（示例）。
+
+```python title='例子： Hello World'
 from slambda import Example, LmFunction, GptApiOptions
 
 hello_world = LmFunction.create(
@@ -105,10 +102,10 @@ hello_world = LmFunction.create(
 )
 
 hello_world()
-# Output: Hello World
+# 输出: Hello World
 ```
 
-```python title='Example: Named Entity Recognition'
+```python title='Example: 命名实体识别'
 from slambda import Example, LmFunction, GptApiOptions
 
 extract_entities = LmFunction.create(
@@ -121,12 +118,12 @@ extract_entities = LmFunction.create(
 )
 
 extract_entities("TriNet Group, Inc. Commences a Fixed Price Tender Offer to Repurchase up to 5,981,308 Shares")
-# Output: TriNet Group, Inc.
+# 输出：TriNet Group, Inc.
 ```
 
-### Extraction
+### 文本信息提取
 
-```python title="Extract Stock Tickers"
+```python title="提取股票代号"
 from slambda import Example, LmFunction, GptApiOptions
 
 find_tickers = LmFunction.create(
@@ -144,7 +141,7 @@ find_tickers("These Stocks Are Moving the Most Today: Keysight, Farfetch, XPeng,
 # Output: '$KEYS, $FTCH, $XPEV, $TSLA, $DE'
 ```
 
-```python title="Extract Wikipeida Links"
+```python title="提取维基百科链接"
 from slambda import Example, LmFunction, GptApiOptions
 
 extract_wiki_links = LmFunction.create(
@@ -182,11 +179,12 @@ extract_wiki_links = LmFunction.create(
     gpt_opts=GptApiOptions(temperature=0)
 )
 
-# If the example out is a dict or list object, the function will also return a dict or list object instead of string.
+# 如果Example output是 dict 或 list 对象，函数将返回 dict 或 list 对象而不是str。
+
 extract_wiki_links(
     "Without negative feedback, and optionally positive feedback for regeneration, an op amp acts as a comparator.")
 
-# Output (this output is a list of python dict):  
+# 输出（此输出是 a list of python dict）:  
 # [{'name': 'negative feedback',
 #  'url': 'https://en.wikipedia.org/wiki/Negative_feedback'},
 # {'name': 'positive feedback',
@@ -196,9 +194,9 @@ extract_wiki_links(
 # {'name': 'comparator', 'url': 'https://en.wikipedia.org/wiki/Comparator'}]
 ```
 
-### Generation
+### 文本生成
 
-```python title="Grammar and Spelling Error Correction"
+```python title="语法和拼写错误纠正"
 from slambda import Example, LmFunction
 
 fix_grammar = LmFunction.create(
@@ -213,11 +211,11 @@ fix_grammar = LmFunction.create(
 
 fix_grammar(
     "Schopenhaur did not deny that the external world exists empiracle, but he followed Kant in claimin' that our knowledge and experiense of the world are always indirekt.")
-# Output: 'Schopenhauer did not deny that the external world exists empirically, but he followed Kant in claiming that our knowledge and experience of the world are always indirect.'
+# 输出: 'Schopenhauer did not deny that the external world exists empirically, but he followed Kant in claiming that our knowledge and experience of the world are always indirect.'
 
 ```
 
-```python title="Generate Essay"
+```python title="生成文章"
 from slambda import Example, LmFunction
 
 generate_essay = LmFunction.create(
@@ -247,7 +245,7 @@ generate_essay(
     age=60  # Yes, it is possible to customize and add more input parameters on the fly 
 )
 
-# Output:
+# 输出:
 # As a non-traditional applicant, my decision to pursue a Master's degree in Computer Science stems from a combination
 # of my diverse work experiences and my passion for embracing new challenges at the age of 60. Having worked as an actor 
 # and bartender, I have always been comfortable in dynamic and fast-paced environments, traits that align 
@@ -274,9 +272,9 @@ generate_essay(
 
 ```
 
-### Classification
+### 文本分类
 
-```python title="Binary Sentiment Classifier"
+```python title="情感识别"
 from slambda import Example, LmFunction, GptApiOptions
 
 sentiment = LmFunction.create(
@@ -298,30 +296,25 @@ sentiment = LmFunction.create(
     gpt_opts=GptApiOptions(temperature=0),
 )
 sentiment("The food is pretty, pretty, pretty, pretty good.")
-# Output: positive
+# 输出: positive
 ```
 
-## Use existing functions
+## 现有函数
 
 ```py
 
 from slambda.contrib.sentiment import sentiment
 
-print(sentiment('the food is great!') == 'positive')
-# Output: True
+print(sentiment('Food is gread.') == 'positive')
+# 输出: True
 ```
 
-See [Functions](/docs/category/builtin-functions) for existing function implementations.
+点击这里[Functions](/docs/category/builtin-functions) 查看现有的函数实现。
 
-## Project Status
+## 项目状态
 
-The basic functionalities of this package have been reasonably tested (coverage: 100%), and you should have no problems
-creating your own
-functions.
+这个包的基本功能已经经过了合理的测试（覆盖率：100%），您创建自己的函数过程中应该不会有问题。
 
-Function implementations in `slambda.contrib` should have a reasonable output quality. However, since they are powered
-by a language model, you should conduct your own evaluation/testing within your problem domain to ensure that the
-model's performance meeting your requirements.
+`slambda.contrib` 中实现的功能应该有相对准确的准确度。然而，由于它们是基于语言模型实现的，您应该在自己的应用过程中自行进行评估和测试，以确保模型的性能符合您的要求。
 
-We plan to add more functions to `slambda.contrib` and provide a more thorough evaluation report for each function
-implementation in the near future.
+我们计划在不久的将来向 `slambda.contrib` 中添加更多的函数，并为每个函数实现提供更全面的评估报告。
