@@ -2,7 +2,8 @@
 
 ## What does slambda do?
 
-We turn instruction and examples into plain python function powered by LLM.
+Integrating language model such as GPT into your code can be a difficult process. sLambda simplifies the process by
+translating natural language instructions and examples into ready-to-use **Python functions**.
 
 ## Install
 

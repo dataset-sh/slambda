@@ -13,8 +13,8 @@ You can enable code block warp in this guide by clicking this button
 
 ## What does slambda do?
 
-Integrating language model such as GPT into your code can be a difficult process. With sLambda, we help you turn
-natural language instructions and examples into **standard python functions** powered by language model.
+Integrating language model such as GPT into your code can be a difficult process. sLambda simplifies the process by 
+translating natural language instructions and examples into ready-to-use **Python functions**.
 
 ## Install
 
