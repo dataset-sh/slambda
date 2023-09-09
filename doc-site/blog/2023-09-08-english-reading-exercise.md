@@ -6,7 +6,6 @@ authors:
 tags: [slambda, use-case]
 ---
 
-
 # Using slambda to turn any article into an English reading exercise
 
 Reading comprehension is one of the most common type of questions in ESL (English as a second language) learning processes and exams. However, the article itself can be out of interest or dull, reducing one's enthusiasm for practicing reading comprehension.
@@ -93,6 +92,7 @@ load_dotenv(dotenv_path=os.path.expanduser('.env.local'))
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 ```
+</details>
 
 ```python
 from slambda import Example, LmFunction, GptApiOptions
@@ -432,4 +432,4 @@ After running the code provided above, we can switch back to command line, and u
 pandoc output.md  -o output.pdf
 ```
 
-You can now print out `output.pdf` and print it out as an ESL learning material.
+You can now print out `output.pdf` and use it as an ESL learning material.
