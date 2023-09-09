@@ -12,7 +12,7 @@ Reading comprehension is one of the most common type of questions in ESL (Englis
 
 Learning English might be more enjoyable and effortless if we turn daily news or articles that fit our interests into reading comprehension questions.
 
-To do so, we can use a large language model, such as ChatGPT. However, after experimenting with this idea using simple prompts, we noticed that while the outputs often look impressive at first glance, there are always a few un-ideal oddities. For example, the output format may vary each time, and occasionally, it will generate mistakes, such as more than one correct answer in a multiple-choice question.
+To do so, we can use a large language model, such as ChatGPT. However, after experimenting with this idea using simple prompts, we noticed that while the outputs often look impressive at first glance, there are always a few minor issues. For example, the output format may vary from time to time, and occasionally, it will generate mistakes, such as more than one correct answer in a multiple-choice question.
 
 Obviously, this is a complicated task, and it may be easier if we break it down into several subtasks and then combine the output of each subtask using a more high-level algorithmic procedure. In this case, 'slambda' will come in handy as it allows you to define these subtasks as python functions using nothing but natural language instructions and several input/output examples.
 
