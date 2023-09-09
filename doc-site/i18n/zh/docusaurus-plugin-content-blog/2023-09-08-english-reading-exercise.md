@@ -30,14 +30,14 @@ tags: [slambda, use-case]
 ```python
 from pydantic import BaseModel, Field
 
-class ReadingExeceriseQuestion(BaseModel):
+class ReadingExecriseQuestion(BaseModel):
     question: str
     correct_answer: str = ''
     wrong_answers: list[str] = Field(default_factory=list)
 
-class ReadingExecerise(BaseModel):
+class ReadingExecrise(BaseModel):
     content: str = ''
-    questions: list[ReadingExeceriseQuestion] = Field(default_factory=list)
+    questions: list[ReadingExecriseQuestion] = Field(default_factory=list)
 ```
 
 ## 分解问题
@@ -45,11 +45,11 @@ class ReadingExecerise(BaseModel):
 然后让我们写下来生成阅读理解的大体流程：
 
 ```python
-def create_reading_execerise(reading_content):
-    e = ReadingExecerise(content=reading_content)
+def create_reading_execrise(reading_content):
+    e = ReadingExecrise(content=reading_content)
     questions = create_questions(reading_content)
     for question in questions:
-        q = ReadingExeceriseQuestion(question=question)
+        q = ReadingExecriseQuestion(question=question)
         correct_answer = create_answer(content=reading_content, question=question)
         q.correct_answer = correct_answer
         wrong_answers = create_wrong_answers(content=reading_content, question=question)
@@ -81,7 +81,7 @@ def create_reading_execerise(reading_content):
 import openai
 from dotenv import load_dotenv
 # 该文件包含了OpenAI API KEY
-load_dotenv(dotenv_path=os.path.expanduser('.env.local'))
+load_dotenv(dotenv_path='.env.local')
 
 # 通过环境变量读取 OPENAI_API_KEY
 openai.api_key = os.getenv('OPENAI_API_KEY')
@@ -100,7 +100,7 @@ create_questions = LmFunction.create(
         Example(
             input="""
 Starting in July, the Test of English as a Foreign Language (TOEFL) will be reduced by one hour, becoming a two-hour exam. This change is aimed at increasing the competitiveness of TOEFL, which has faced competition from Duolingo, a language testing provider with a one-hour test. While many colleges have adopted test-optional policies for admissions, they still require English proficiency tests for non-native English speakers. The change will not affect the shorter TOEFL Essentials Test introduced in 2021 and will not impact the pricing of the longer TOEFL iBT exam. TOEFL representatives argue that their test remains superior to Duolingo's.
-Specific changes to the new TOEFL iBT include a shorter reading section, a more concise writing task, and the removal of unscored test questions. Duolingo, however, remains confident in its own approach and widespread acceptance among U.S. colleges. TOEFL's executive director reports growing test volumes in recent years, particularly in key markets like China and India, emphasizing their commitment to innovation and maintaining high standards of validity, reliability, security, and fairness.            
+Specific changes to the new TOEFL iBT include a shorter reading section, a more concise writing task, and the removal of unscored test questions. Duolingo, however, remains confident in its own approach and widespread acceptance among U.S. colleges. TOEFL's executive director reports growing test volumes in recent years, particularly in key markets like China and India, emphasizing their commitment to innovation and maintaining high standards of validity, reliability, security, and fairness.
             """,
             output=[
 "What is the primary reason for the reduction in the duration of the TOEFL exam?",
@@ -151,11 +151,11 @@ Specific changes to the new TOEFL iBT include a shorter reading section, a more 
 )
 
 
-def create_reading_execerise(reading_content):
-    e = ReadingExecerise(content=reading_content)
+def create_reading_execrise(reading_content):
+    e = ReadingExecrise(content=reading_content)
     questions = create_questions(reading_content)
     for question in questions:
-        q = ReadingExeceriseQuestion(question=question)
+        q = ReadingExecriseQuestion(question=question)
         correct_answer = create_answer(content=reading_content, question=question)
         q.correct_answer = correct_answer
         wrong_answers = create_wrong_answers(content=reading_content, question=question)
@@ -165,97 +165,87 @@ def create_reading_execerise(reading_content):
     return e
 
 
-response = create_reading_execerise(article)
+response = create_reading_execrise(article)
 ```
 
 在上面的例子中，`create_questions` 和 `create_wrong_answers`返回的都是一个`list[str]`，`create_answer`返回的是单个`str`。
 
 ## 生成可打印的PDF
 
-加上上面的三个slambda函数之后， 之前写好的`create_reading_execerise`函数可以返回一个我们定义的`ReadingExecerise`实例。这个格式虽然在python里面非常方便，但开发者以外的的普通英语学习者使用起来会非常不方便。所以我们想把这个内容渲染到PDF，变成一个可打印的阅读练习。这里我们可以先生成markdown文档，再使用pandoc生成pdf。
+加上上面的三个slambda函数之后， 之前写好的`create_reading_execrise`函数可以返回一个我们定义的`ReadingExecrise`实例。这个格式虽然在python里面非常方便，但开发者以外的的普通英语学习者使用起来会非常不方便。所以我们想把这个内容渲染到一个Word文档，变成一个可打印的阅读练习。这里我们可以另外一个开源库[python-docx](https://python-docx.readthedocs.io/en/latest/#user-guide)。
 
-我们可以使用如下代码生成markdown。
+我们可以使用如下代码生成word文档。
 
 ```python
+from docx import Document
+from docx.shared import Inches
 from random import shuffle
 
 def shuffle_options(correct_option, wrong_options):
     l = [*wrong_options, correct_option]
     shuffle(l)
     return l, l.index(correct_option)
+
+def generate_worddoc(exercise):
+    document = Document()
     
-def question_to_markdown(q):
-    ([oa, ob, oc, od], ans_idx) = shuffle_options(q.correct_answer, q.wrong_answers)
-    ans_key = chr(ord('A') + ans_idx)
-    return f"""
-{q.question}
+    document.add_heading('文章', level=1)
 
-[ ] A. {oa}
+    document.add_paragraph('')
 
-[ ] B. {ob}
-
-[ ] C. {oc}
-
-[ ] D. {od}
-
-    """.strip(), ans_key
-
-
-def execerise_to_markdown(e):
+    for p in exercise.content.split('\n'):
+        p = document.add_paragraph(p)
     
-    questions_and_key = [question_to_markdown(x) for x in e.questions]
-    questions = ''
-    answers = '# Ansers:\n\n'
-    content = '\n\n'.join(e.content.split('\n'))
-    for i, (q, k) in enumerate(questions_and_key):
-        questions += f"## Question {i + 1 }\n\n"
-        questions += q
-        questions += '\n\n\n'
+    document.add_heading('问题', level=1)
+    
+    ans = []
+    
+    for qid, question in enumerate(exercise.questions):
+        document.add_paragraph(f'Question {qid + 1}:')
+
+        (options, ans_idx) = shuffle_options(question.correct_answer, question.wrong_answers)
+
+        ans_key = chr(ord('A') + ans_idx)
+        ans.append(ans_key)
         
-        answers += f"* Question {i + 1 :<2} : {k}\n\n"        
-    
-    main = f"""
-# Article
-
-{content}
+        for i, op in enumerate(options):
+            op_key = chr(ord('A') + i)
+            document.add_paragraph(f'    {op_key}. {op}')
+        document.add_paragraph('')
 
 
-# Questions
+    document.add_page_break()
+    document.add_heading('答案', level=1)
 
-{questions}
-    """.strip()
-    
-    
-    return main + "\n\pagebreak\n" + answers
-
-
-md_output = execerise_to_markdown(response)
-
-with open('./output.md', 'w') as out:
-    out.write(md_output)
-
+    for qid, ans_key in enumerate(ans):
+        document.add_paragraph(f'Question {qid + 1}: {ans_key}')
+        
+    document.save('./output.docx')
 ```
-
-当有了Markdown文件后，我们可以使用开源工具[Pandoc](https://pandoc.org/)把markdown渲染成pdf， 以方便我们阅读或者打印。您可以参考[Pandoc官网](https://pandoc.org/)来安装pandoc。
-
-Pandoc的使用方式如下。
-```bash
-pandoc output.md  -o output.pdf
-```
+现在你就可以打印`output.docx`，开始你的英语练习了。
 
 ## 完整代码
+
+### 依存库
+
+```bash
+pip install slambda python-docx openai pydantic python-dotenv
+```
+### 代码
 
 ```python
 import os
 import openai
 
+from docx import Document
+from docx.shared import Inches
 from dotenv import load_dotenv
 from slambda import Example, LmFunction, GptApiOptions
 from pydantic import BaseModel, Field
 from random import shuffle
 
 # 该文件包含了OpenAI API KEY，
-load_dotenv(dotenv_path=os.path.expanduser('.env.local'))
+load_dotenv(dotenv_path='.env.local')
 
 # 通过环境变量读取 OPENAI_API_KEY
 openai.api_key = os.getenv('OPENAI_API_KEY')
@@ -265,14 +255,14 @@ if openai.api_key is None:
     raise ValueError('找不到OPENAI_API_KEY')
 
 # 定义数据结构
-class ReadingExeceriseQuestion(BaseModel):
+class ReadingExecriseQuestion(BaseModel):
     question: str
     correct_answer: str = ''
     wrong_answers: list[str] = Field(default_factory=list)
 
-class ReadingExecerise(BaseModel):
+class ReadingExecrise(BaseModel):
     content: str = ''
-    questions: list[ReadingExeceriseQuestion] = Field(default_factory=list)
+    questions: list[ReadingExecriseQuestion] = Field(default_factory=list)
 
 
 # 定义slambda函数
@@ -335,11 +325,11 @@ Specific changes to the new TOEFL iBT include a shorter reading section, a more 
 
 
 # 生成题目和选项
-def create_reading_execerise(reading_content):
-    e = ReadingExecerise(content=reading_content)
+def create_reading_execrise(reading_content):
+    e = ReadingExecrise(content=reading_content)
     questions = create_questions(reading_content)
     for question in questions:
-        q = ReadingExeceriseQuestion(question=question)
+        q = ReadingExecriseQuestion(question=question)
         correct_answer = create_answer(content=reading_content, question=question)
         q.correct_answer = correct_answer
         wrong_answers = create_wrong_answers(content=reading_content, question=question)
@@ -349,54 +339,48 @@ def create_reading_execerise(reading_content):
     return e
 
 
-# 生成Markdown相关函数
+# 生成Word文档相关函数
 
 def shuffle_options(correct_option, wrong_options):
     l = [*wrong_options, correct_option]
     shuffle(l)
     return l, l.index(correct_option)
 
-def question_to_markdown(q):
-    ([oa, ob, oc, od], ans_idx) = shuffle_options(q.correct_answer, q.wrong_answers)
-    ans_key = chr(ord('A') + ans_idx)
-    return f"""
-{q.question}
-
-[ ] A. {oa}
-
-[ ] B. {ob}
-
-[ ] C. {oc}
-
-[ ] D. {od}
-
-    """.strip(), ans_key
-
-
-def execerise_to_markdown(e):
+def generate_worddoc(exercise):
+    document = Document()
     
-    questions_and_key = [question_to_markdown(x) for x in e.questions]
-    questions = ''
-    answers = '# Ansers:\n\n'
-    content = '\n\n'.join(e.content.split('\n'))
-    for i, (q, k) in enumerate(questions_and_key):
-        questions += f"## Question {i + 1 }\n\n"
-        questions += q
-        questions += '\n\n\n'
+    document.add_heading('文章', level=1)
+    
+    document.add_paragraph('')
+
+    for p in exercise.content.split('\n'):
+        p = document.add_paragraph(p)
+    
+    document.add_heading('问题', level=1)
+    
+    ans = []
+    
+    for qid, question in enumerate(exercise.questions):
+        document.add_paragraph(f'Question {qid + 1}:')
+
+        (options, ans_idx) = shuffle_options(question.correct_answer, question.wrong_answers)
+
+        ans_key = chr(ord('A') + ans_idx)
+        ans.append(ans_key)
         
-        answers += f"* Question {i + 1 :<2} : {k}\n\n"        
-    
-    main = f"""
-# Article
+        for i, op in enumerate(options):
+            op_key = chr(ord('A') + i)
+            document.add_paragraph(f'    {op_key}. {op}')
+        document.add_paragraph('')
 
-{content}
 
-# Questions
+    document.add_page_break()
+    document.add_heading('答案', level=1)
 
-{questions}
-    """.strip()
-
-    return main + "\n\pagebreak\n" + answers
+    for qid, ans_key in enumerate(ans):
+        document.add_paragraph(f'Question {qid + 1}: {ans_key}')
+        
+    document.save('./output.docx')
 
 
 
@@ -410,19 +394,10 @@ Financial institutions have been offering the First Home Savings Account to Cana
 """.strip()
 
 # 生成阅读练习
-response = create_reading_execerise(article)
+execrise = create_reading_execrise(article)
 
-# 转换成Markdown， 并写入`./output.md`
-md_output = execerise_to_markdown(response)
-
-with open('./output.md', 'w') as out:
-    out.write(md_output)
+# 转换成word格式， 并写入`./output.docx`
+generate_worddoc(execrise)
 ```
 
-现在我们可以回到命令行，执行以上代码，然后使用pandoc把刚刚生成的markdown文件转换成pdf格式。
-
-```bash
-pandoc output.md  -o output.pdf
-```
-
-现在你就可以打印`output.pdf`，开始你的英语练习了。
+现在你就可以打印`output.docx`，开始你的英语练习了。
