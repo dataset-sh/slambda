@@ -165,7 +165,7 @@ def create_reading_execrise(reading_content):
     return e
 
 
-response = create_reading_execrise(article)
+execrise = create_reading_execrise(article)
 ```
 
 在上面的例子中，`create_questions` 和 `create_wrong_answers`返回的都是一个`list[str]`，`create_answer`返回的是单个`str`。
@@ -221,6 +221,8 @@ def generate_worddoc(exercise):
         document.add_paragraph(f'Question {qid + 1}: {ans_key}')
         
     document.save('./output.docx')
+
+generate_worddoc(exercise)    
 ```
 现在你就可以打印`output.docx`，开始你的英语练习了。
 

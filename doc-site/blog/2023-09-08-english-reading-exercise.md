@@ -168,7 +168,7 @@ def create_reading_execrise(reading_content):
     return e
 
 
-response = create_reading_execrise(article)
+execrise = create_reading_execrise(article)
 
 ```
 
@@ -226,8 +226,11 @@ def generate_worddoc(exercise):
         
     document.save('./output.docx')
 
+generate_worddoc(exercise)
+
 ```
 
+You can now print out `output.docs` and use it as an ESL learning material.
 
 ## The complete source code
 
