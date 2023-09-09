@@ -170,7 +170,7 @@ execrise = create_reading_execrise(article)
 
 在上面的例子中，`create_questions` 和 `create_wrong_answers`返回的都是一个`list[str]`，`create_answer`返回的是单个`str`。
 
-## 生成可打印的PDF
+## 生成可打印的Word文档
 
 加上上面的三个slambda函数之后， 之前写好的`create_reading_execrise`函数可以返回一个我们定义的`ReadingExecrise`实例。这个格式虽然在python里面非常方便，但开发者以外的的普通英语学习者使用起来会非常不方便。所以我们想把这个内容渲染到一个Word文档，变成一个可打印的阅读练习。这里我们可以另外一个开源库[python-docx](https://python-docx.readthedocs.io/en/latest/#user-guide)。
 
@@ -222,7 +222,7 @@ def generate_worddoc(exercise):
         
     document.save('./output.docx')
 
-generate_worddoc(exercise)    
+generate_worddoc(exercise)
 ```
 现在你就可以打印`output.docx`，开始你的英语练习了。
 

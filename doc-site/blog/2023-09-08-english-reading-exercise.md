@@ -14,13 +14,13 @@ Learning English might be more enjoyable and effortless if we turn daily news or
 
 To do so, we can use a large language model, such as ChatGPT. However, after experimenting with this idea using simple prompts, we noticed that while the outputs often look impressive at first glance, there are always a few minor issues. For example, the output format may vary from time to time, and occasionally, it will generate mistakes, such as more than one correct answer in a multiple-choice question.
 
-Obviously, this is a complicated task, and it may be easier if we break it down into several subtasks and then combine the output of each subtask using a more high-level algorithmic procedure. In this case, 'slambda' will come in handy as it allows you to define these subtasks as python functions using nothing but natural language instructions and several input/output examples.
+Obviously, this is a complicated task, and in order to resolve the issues we mentioned above, we can try to break it down into several simpler subtasks and then combine the output of each subtask using a high-level algorithmic procedure. In this case, 'slambda' will come in handy as it allows you to define these subtasks as python functions using nothing but natural language instructions and several input/output examples.
 
 For example, after playing around this idea a little bit more, we have made the following observations:
 
 * When given an article, the language model can reliably generate questions.
 * When given an article and a question, the language model can accurately answer the question.
-* When given an article and a question, the language model can reliably generate incorrect options.
+* When given an article and a question, the language model can reliably and correctly generate incorrect options for the multiple choice question.
 
 With these observations in mind, we can start to implement a high-level procedure for generating reading comprehension questions given the content of an article, and we will write it as a python function.
 
