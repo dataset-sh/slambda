@@ -230,7 +230,7 @@ generate_worddoc(exercise)
 
 ## 完整代码
 
-### 依存库
+### 依赖库
 
 ```bash
 pip install slambda python-docx openai pydantic python-dotenv
