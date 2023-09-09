@@ -8,13 +8,13 @@ tags: [slambda, use-case]
 
 # 使用slambda把任意文章变成英语阅读练习
 
-阅读理解类题目是英语考试中经常出现的题型，但是有时因为文章实在过于无聊或者自己不感兴趣，降低了自己练习阅读理解的积极性。
+阅读理解类题目是英语考试中经常出现的题型，但是我们非常容易因为文章实在过于无聊或者自己不感兴趣，降低了自己练习阅读理解的积极性。
 
 如果我们能把每天读的新闻，或者自己感兴趣的文章变成阅读理解题目，可能能让学英语的过程更加轻松有趣。
 
-直接使用大语言模型，比如chatgpt生成英语练习题目，在我们的实验中，虽然可以生成出看起来格式正确的回复，但是生成出的题目选项经常出现多个答案均为正确答案。
+我们可以直接使用大语言模型，比如chatgpt来生成英语练习题。在我们的实验中，虽然生成出来的内容一眼望去非常不错，但是仔细观察观察还是能看到一些小错误， 比如格式不统一，或者单选题中可能可能包含多个正确答案。
 
-这时我们可以考虑将生成阅读理解题目这一过程分解成更简单的一系列子任务， 再通过程序把这些子任务组合起来。这种情况下，`slambda`可以非常方便的让你把这些子任务定义成可以直接使用的python函数。
+这时我们可以考虑将生成阅读理解题目这一过程分解成一系列更简单的子任务， 再通过程序把这些子任务组合起来。这种情况下，`slambda`可以非常方便的让你把这些子任务定义成可以直接使用的python函数。
 
 比如我们在进行了一些小实验后有了如下的观察：
 1. 当给定一篇文章后，语言模型能够比较可靠的生成问题
@@ -64,12 +64,32 @@ def create_reading_execerise(reading_content):
 
 ## 定义slambda函数
 
-为了让上面的函数可以真的被执行并返回我们想要的信息，我们还需要定义下面几个函数
+为了让上面的函数可以真的被执行并返回我们想要的信息，我们还需要定义下面几个函数：
 * `create_questions(content)`: 对给定文章生成n个阅读理解问题
 * `create_answer(content, question)`: 对给定文章和问题，给出正确答案
 * `create_wrong_answers(question)`: 对给定文章和问题，给出3个错误选项
 
 有了语言模型和slambda，实现上面这些函数就很简单了, 我们只需要给出自然语言指令和一些输入输出例子，slambda可以直接通过这两个信息创建一个python函数。
+
+
+<details><summary>您需要Openai API key才能使用slambda
+</summary>
+
+关于如何加载Openai API key，可以阅读我们的<a href="/zh/docs/tips/apikey" target="_blank">相关文档</a>
+
+```python title="加载Openai API key"
+import openai
+from dotenv import load_dotenv
+# 该文件包含了OpenAI API KEY
+load_dotenv(dotenv_path=os.path.expanduser('.env.local'))
+
+# 通过环境变量读取 OPENAI_API_KEY
+openai.api_key = os.getenv('OPENAI_API_KEY')
+
+```
+
+</details>
+
 
 ```python
 from slambda import Example, LmFunction, GptApiOptions
@@ -129,13 +149,30 @@ Specific changes to the new TOEFL iBT include a shorter reading section, a more 
         )
     ]
 )
+
+
+def create_reading_execerise(reading_content):
+    e = ReadingExecerise(content=reading_content)
+    questions = create_questions(reading_content)
+    for question in questions:
+        q = ReadingExeceriseQuestion(question=question)
+        correct_answer = create_answer(content=reading_content, question=question)
+        q.correct_answer = correct_answer
+        wrong_answers = create_wrong_answers(content=reading_content, question=question)
+        for wrong_answer in wrong_answers:
+            q.wrong_answers.append(wrong_answer)
+        e.questions.append(q)
+    return e
+
+
+response = create_reading_execerise(article)
 ```
 
 在上面的例子中，`create_questions` 和 `create_wrong_answers`返回的都是一个`list[str]`，`create_answer`返回的是单个`str`。
 
 ## 生成可打印的PDF
 
-加上上面的三个slambda函数之后， 之前写好的`create_reading_execerise`函数可以返回一个我们定义的`ReadingExecerise`实例。但是这个格式对普通英语学习者非常不友好，所以我们想把这个内容渲染到PDF，变成一个可打印的阅读练习。这里我们可以通过生成markdown文档，再使用pandoc生成pdf。
+加上上面的三个slambda函数之后， 之前写好的`create_reading_execerise`函数可以返回一个我们定义的`ReadingExecerise`实例。这个格式虽然在python里面非常方便，但开发者以外的的普通英语学习者使用起来会非常不方便。所以我们想把这个内容渲染到PDF，变成一个可打印的阅读练习。这里我们可以先生成markdown文档，再使用pandoc生成pdf。
 
 我们可以使用如下代码生成markdown。
 
@@ -190,13 +227,20 @@ def execerise_to_markdown(e):
     
     
     return main + "\n\pagebreak\n" + answers
+
+
+md_output = execerise_to_markdown(response)
+
+with open('./output.md', 'w') as out:
+    out.write(md_output)
+
 ```
 
 当有了Markdown文件后，我们可以使用开源工具[Pandoc](https://pandoc.org/)把markdown渲染成pdf， 以方便我们阅读或者打印。您可以参考[Pandoc官网](https://pandoc.org/)来安装pandoc。
 
 Pandoc的使用方式如下。
 ```bash
-pandoc name.md  -o name.pdf
+pandoc output.md  -o output.pdf
 ```
 
 ## 完整代码

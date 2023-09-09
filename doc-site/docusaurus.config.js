@@ -92,6 +92,10 @@ const config = {
                     },
                     { to: '/blog', label: 'Blog', position: 'left' },
                     {
+                        type: 'localeDropdown',
+                        position: 'right',
+                      },
+                    {
                         href: 'https://github.com/dataset-sh/slambda',
                         label: 'GitHub',
                         position: 'right',
