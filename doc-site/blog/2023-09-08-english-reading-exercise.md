@@ -206,6 +206,7 @@ def generate_worddoc(exercise):
     
     for qid, question in enumerate(exercise.questions):
         document.add_paragraph(f'Question {qid + 1}:')
+        document.add_paragraph(f'{question.question}')
 
         (options, ans_idx) = shuffle_options(question.correct_answer, question.wrong_answers)
 
@@ -225,6 +226,8 @@ def generate_worddoc(exercise):
         document.add_paragraph(f'Question {qid + 1}: {ans_key}')
         
     document.save('./output.docx')
+    print(f'Execrise has been saved to {os.path.abspath("./output.docx")}')
+
 
 generate_worddoc(exercise)
 
@@ -374,6 +377,7 @@ def generate_worddoc(exercise):
     
     for qid, question in enumerate(exercise.questions):
         document.add_paragraph(f'Question {qid + 1}:')
+        document.add_paragraph(f'{question.question}')
 
         (options, ans_idx) = shuffle_options(question.correct_answer, question.wrong_answers)
 
@@ -391,8 +395,10 @@ def generate_worddoc(exercise):
 
     for qid, ans_key in enumerate(ans):
         document.add_paragraph(f'Question {qid + 1}: {ans_key}')
-        
+
     document.save('./output.docx')
+    print(f'Execrise has been saved to {os.path.abspath("./output.docx")}')
+
 
 # We have everything now, let's test them.
 
