@@ -30,14 +30,14 @@ tags: [slambda, use-case]
 ```python
 from pydantic import BaseModel, Field
 
-class ReadingExecriseQuestion(BaseModel):
+class ReadingExerciseQuestion(BaseModel):
     question: str
     correct_answer: str = ''
     wrong_answers: list[str] = Field(default_factory=list)
 
-class ReadingExecrise(BaseModel):
+class ReadingExercise(BaseModel):
     content: str = ''
-    questions: list[ReadingExecriseQuestion] = Field(default_factory=list)
+    questions: list[ReadingExerciseQuestion] = Field(default_factory=list)
 ```
 
 ## 分解问题
@@ -45,11 +45,11 @@ class ReadingExecrise(BaseModel):
 然后让我们写下来生成阅读理解的大体流程：
 
 ```python
-def create_reading_execrise(reading_content):
-    e = ReadingExecrise(content=reading_content)
+def create_reading_exercise(reading_content):
+    e = ReadingExercise(content=reading_content)
     questions = create_questions(reading_content)
     for question in questions:
-        q = ReadingExecriseQuestion(question=question)
+        q = ReadingExerciseQuestion(question=question)
         correct_answer = create_answer(content=reading_content, question=question)
         q.correct_answer = correct_answer
         wrong_answers = create_wrong_answers(content=reading_content, question=question)
@@ -151,11 +151,11 @@ Specific changes to the new TOEFL iBT include a shorter reading section, a more 
 )
 
 
-def create_reading_execrise(reading_content):
-    e = ReadingExecrise(content=reading_content)
+def create_reading_exercise(reading_content):
+    e = ReadingExercise(content=reading_content)
     questions = create_questions(reading_content)
     for question in questions:
-        q = ReadingExecriseQuestion(question=question)
+        q = ReadingExerciseQuestion(question=question)
         correct_answer = create_answer(content=reading_content, question=question)
         q.correct_answer = correct_answer
         wrong_answers = create_wrong_answers(content=reading_content, question=question)
@@ -165,14 +165,14 @@ def create_reading_execrise(reading_content):
     return e
 
 
-execrise = create_reading_execrise(article)
+exercise = create_reading_exercise(article)
 ```
 
 在上面的例子中，`create_questions` 和 `create_wrong_answers`返回的都是一个`list[str]`，`create_answer`返回的是单个`str`。
 
 ## 生成可打印的Word文档
 
-加上上面的三个slambda函数之后， 之前写好的`create_reading_execrise`函数可以返回一个我们定义的`ReadingExecrise`实例。这个格式虽然在python里面非常方便，但开发者以外的的普通英语学习者使用起来会非常不方便。所以我们想把这个内容渲染到一个Word文档，变成一个可打印的阅读练习。这里我们可以另外一个开源库[python-docx](https://python-docx.readthedocs.io/en/latest/#user-guide)。
+加上上面的三个slambda函数之后， 之前写好的`create_reading_exercise`函数可以返回一个我们定义的`ReadingExercise`实例。这个格式虽然在python里面非常方便，但开发者以外的的普通英语学习者使用起来会非常不方便。所以我们想把这个内容渲染到一个Word文档，变成一个可打印的阅读练习。这里我们可以另外一个开源库[python-docx](https://python-docx.readthedocs.io/en/latest/#user-guide)。
 
 我们可以使用如下代码生成word文档。
 
@@ -222,7 +222,7 @@ def generate_worddoc(exercise):
         document.add_paragraph(f'Question {qid + 1}: {ans_key}')
         
     document.save('./output.docx')
-    print(f'Execrise has been saved to {os.path.abspath("./output.docx")}')
+    print(f'Exercise has been saved to {os.path.abspath("./output.docx")}')
 
 generate_worddoc(exercise)
 ```
@@ -259,14 +259,14 @@ if openai.api_key is None:
     raise ValueError('找不到OPENAI_API_KEY')
 
 # 定义数据结构
-class ReadingExecriseQuestion(BaseModel):
+class ReadingExerciseQuestion(BaseModel):
     question: str
     correct_answer: str = ''
     wrong_answers: list[str] = Field(default_factory=list)
 
-class ReadingExecrise(BaseModel):
+class ReadingExercise(BaseModel):
     content: str = ''
-    questions: list[ReadingExecriseQuestion] = Field(default_factory=list)
+    questions: list[ReadingExerciseQuestion] = Field(default_factory=list)
 
 
 # 定义slambda函数
@@ -329,11 +329,11 @@ Specific changes to the new TOEFL iBT include a shorter reading section, a more 
 
 
 # 生成题目和选项
-def create_reading_execrise(reading_content):
-    e = ReadingExecrise(content=reading_content)
+def create_reading_exercise(reading_content):
+    e = ReadingExercise(content=reading_content)
     questions = create_questions(reading_content)
     for question in questions:
-        q = ReadingExecriseQuestion(question=question)
+        q = ReadingExerciseQuestion(question=question)
         correct_answer = create_answer(content=reading_content, question=question)
         q.correct_answer = correct_answer
         wrong_answers = create_wrong_answers(content=reading_content, question=question)
@@ -386,7 +386,7 @@ def generate_worddoc(exercise):
         document.add_paragraph(f'Question {qid + 1}: {ans_key}')
 
     document.save('./output.docx')
-    print(f'Execrise has been saved to {os.path.abspath("./output.docx")}')
+    print(f'Exercise has been saved to {os.path.abspath("./output.docx")}')
 
 
 
@@ -400,10 +400,10 @@ Financial institutions have been offering the First Home Savings Account to Cana
 """.strip()
 
 # 生成阅读练习
-execrise = create_reading_execrise(article)
+exercise = create_reading_exercise(article)
 
 # 转换成word格式， 并写入`./output.docx`
-generate_worddoc(execrise)
+generate_worddoc(exercise)
 ```
 
 现在你就可以打印`output.docx`，开始你的英语练习了。

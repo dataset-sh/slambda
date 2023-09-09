@@ -31,14 +31,14 @@ First, we need to define the necessary data structures:
 ```python
 from pydantic import BaseModel, Field
 
-class ReadingExecriseQuestion(BaseModel):
+class ReadingExerciseQuestion(BaseModel):
     question: str
     correct_answer: str = ''
     wrong_answers: list[str] = Field(default_factory=list)
 
-class ReadingExecrise(BaseModel):
+class ReadingExercise(BaseModel):
     content: str = ''
-    questions: list[ReadingExecriseQuestion] = Field(default_factory=list)
+    questions: list[ReadingExerciseQuestion] = Field(default_factory=list)
 ```
 
 
@@ -48,11 +48,11 @@ Then, let's outline the general process for generating reading comprehension exe
 
 
 ```python
-def create_reading_execrise(reading_content):
-    e = ReadingExecrise(content=reading_content)
+def create_reading_exercise(reading_content):
+    e = ReadingExercise(content=reading_content)
     questions = create_questions(reading_content)
     for question in questions:
-        q = ReadingExecriseQuestion(question=question)
+        q = ReadingExerciseQuestion(question=question)
         correct_answer = create_answer(content=reading_content, question=question)
         q.correct_answer = correct_answer
         wrong_answers = create_wrong_answers(content=reading_content, question=question)
@@ -67,7 +67,7 @@ In the code above, we will only generate the question bodies for the given artic
 
 ## Defining slambda Functions
 
-The following functions are still not defined in the body of the function `create_reading_execrise`:
+The following functions are still not defined in the body of the function `create_reading_exercise`:
 
 * `create_questions(content)`: Generates some reading comprehension questions for the given article.
 * `create_answer(content, question)`: Provides the correct answer for the given article and question.
@@ -154,11 +154,11 @@ Specific changes to the new TOEFL iBT include a shorter reading section, a more 
 )
 
 
-def create_reading_execrise(reading_content):
-    e = ReadingExecrise(content=reading_content)
+def create_reading_exercise(reading_content):
+    e = ReadingExercise(content=reading_content)
     questions = create_questions(reading_content)
     for question in questions:
-        q = ReadingExecriseQuestion(question=question)
+        q = ReadingExerciseQuestion(question=question)
         correct_answer = create_answer(content=reading_content, question=question)
         q.correct_answer = correct_answer
         wrong_answers = create_wrong_answers(content=reading_content, question=question)
@@ -168,7 +168,7 @@ def create_reading_execrise(reading_content):
     return e
 
 
-execrise = create_reading_execrise(article)
+exercise = create_reading_exercise(article)
 
 ```
 
@@ -176,7 +176,7 @@ In the example above, both `create_questions` and `create_wrong_answers` return 
 
 ## Generating a MS Word Document
 
-Now, with everything defined, we can run the code to create a reading comphrehension execrise. However, its output format is in a pydantic model, which is not very human-readable. So, we need to render this content to a word docx file so we can print it out with Word and use it as real study material. In this case, we can generate a docx file from the `ReadingExecrise` instance using another open-source library [python-docx](https://python-docx.readthedocs.io/en/latest/#user-guide).
+Now, with everything defined, we can run the code to create a reading comphrehension exercise. However, its output format is in a pydantic model, which is not very human-readable. So, we need to render this content to a word docx file so we can print it out with Word and use it as real study material. In this case, we can generate a docx file from the `ReadingExercise` instance using another open-source library [python-docx](https://python-docx.readthedocs.io/en/latest/#user-guide).
 
 We can use the following code to generate a word document.
 
@@ -226,7 +226,7 @@ def generate_worddoc(exercise):
         document.add_paragraph(f'Question {qid + 1}: {ans_key}')
         
     document.save('./output.docx')
-    print(f'Execrise has been saved to {os.path.abspath("./output.docx")}')
+    print(f'Exercise has been saved to {os.path.abspath("./output.docx")}')
 
 
 generate_worddoc(exercise)
@@ -269,14 +269,14 @@ if openai.api_key is None:
 
 # Define Data Structures
 
-class ReadingExecriseQuestion(BaseModel):
+class ReadingExerciseQuestion(BaseModel):
     question: str
     correct_answer: str = ''
     wrong_answers: list[str] = Field(default_factory=list)
 
-class ReadingExecrise(BaseModel):
+class ReadingExercise(BaseModel):
     content: str = ''
-    questions: list[ReadingExecriseQuestion] = Field(default_factory=list)
+    questions: list[ReadingExerciseQuestion] = Field(default_factory=list)
 
 
 # Define Slambda functions
@@ -340,11 +340,11 @@ Specific changes to the new TOEFL iBT include a shorter reading section, a more 
 
 # Generate Questions and Options
 
-def create_reading_execrise(reading_content):
-    e = ReadingExecrise(content=reading_content)
+def create_reading_exercise(reading_content):
+    e = ReadingExercise(content=reading_content)
     questions = create_questions(reading_content)
     for question in questions:
-        q = ReadingExecriseQuestion(question=question)
+        q = ReadingExerciseQuestion(question=question)
         correct_answer = create_answer(content=reading_content, question=question)
         q.correct_answer = correct_answer
         wrong_answers = create_wrong_answers(content=reading_content, question=question)
@@ -397,7 +397,7 @@ def generate_worddoc(exercise):
         document.add_paragraph(f'Question {qid + 1}: {ans_key}')
 
     document.save('./output.docx')
-    print(f'Execrise has been saved to {os.path.abspath("./output.docx")}')
+    print(f'Exercise has been saved to {os.path.abspath("./output.docx")}')
 
 
 # We have everything now, let's test them.
@@ -409,10 +409,10 @@ Financial institutions have been offering the First Home Savings Account to Cana
 """.strip()
 
 # Generate a reading exercise
-execrise = create_reading_execrise(article)
+exercise = create_reading_exercise(article)
 
 # Convert it to docx and write to './output.docx'
-generate_worddoc(execrise)
+generate_worddoc(exercise)
 
 ```
 
