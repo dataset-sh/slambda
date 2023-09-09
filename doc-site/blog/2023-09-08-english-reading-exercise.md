@@ -8,7 +8,7 @@ tags: [slambda, use-case]
 
 # Using slambda to turn any article into an English reading exercise
 
-Reading comprehension is one of the most common type of questions in ESL (English as a second language) learning processes and exams. However, the article itself can be out of interest or dull, reducing one's enthusiasm for practicing reading comprehension.
+Reading comprehension is one of the most common type of questions in ESL (English as a second language) learning processes and exams. However, the article itself can be out of interest or dull, reducing one's enthusiasm for practicing english skill.
 
 Learning English might be more enjoyable and effortless if we turn daily news or articles that fit our interests into reading comprehension questions.
 
