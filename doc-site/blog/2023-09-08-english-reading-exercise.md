@@ -6,6 +6,11 @@ authors:
 tags: [slambda, use-case]
 ---
 
+:::tip
+You can enable code block warp in this guide by clicking this button
+![Code Block Warp Button](/img/code-block-wrap-button.png)
+:::
+
 # Using slambda to turn any article into an English reading exercise
 
 Reading comprehension is one of the most common type of questions in ESL (English as a second language) learning processes and exams. However, the article itself can be out of interest or dull, reducing one's enthusiasm for practicing english skill.
@@ -167,9 +172,6 @@ def create_reading_exercise(reading_content):
             q.wrong_answers.append(wrong_answer)
         e.questions.append(q)
     return e
-
-
-exercise = create_reading_exercise(article)
 
 ```
 In the example above, both `create_questions` and `create_wrong_answers` return a `list[str]`, while `create_answer` returns a single `str`.
