@@ -7,7 +7,7 @@ sidebar_position: 2
 # 指南
 
 :::tip
-你可以通过点击此按钮在这个指南中启用代码展开（Code Block Warp Button）功能。
+你可以通过点击此按钮在这个指南中启用代码自动换好功能来查看过长的代码行数。
 ![Code Block Warp Button](/img/code-block-wrap-button.png)
 :::
 

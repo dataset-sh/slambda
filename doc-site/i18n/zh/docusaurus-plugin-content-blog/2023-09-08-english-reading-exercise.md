@@ -6,6 +6,11 @@ authors:
 tags: [slambda, use-case]
 ---
 
+:::tip
+你可以通过点击此按钮在这个指南中启用代码自动换好功能来查看过长的代码行数。
+![Code Block Warp Button](/img/code-block-wrap-button.png)
+:::
+
 # 使用slambda把任意文章变成英语阅读练习
 
 阅读理解类题目是英语考试中经常出现的题型，但是我们非常容易因为文章实在过于无聊或者自己不感兴趣，降低了自己练习阅读理解的积极性。
@@ -78,6 +83,7 @@ def create_reading_exercise(reading_content):
 关于如何加载Openai API key，可以阅读我们的<a href="/zh/docs/tips/apikey" target="_blank">相关文档</a>
 
 ```python title="加载Openai API key"
+import os
 import openai
 from dotenv import load_dotenv
 # 该文件包含了OpenAI API KEY
@@ -115,7 +121,7 @@ Specific changes to the new TOEFL iBT include a shorter reading section, a more 
 
 
 create_answer = LmFunction.create(
-    instruction="Answer the question base on the given article",
+    instruction="Answer the question base on the given articl in one sentence",
     examples=[
         Example(
             input={
@@ -164,11 +170,24 @@ def create_reading_exercise(reading_content):
         e.questions.append(q)
     return e
 
-
-exercise = create_reading_exercise(article)
 ```
 
 在上面的例子中，`create_questions` 和 `create_wrong_answers`返回的都是一个`list[str]`，`create_answer`返回的是单个`str`。
+
+我们现在把复制一篇维基百科文章的一部分来试一试，比如[这篇文章](https://en.wikipedia.org/wiki/Large_language_model)
+
+```python
+article = """
+A large language model (LLM) is a language model characterized by its large size. Their size is enabled by AI accelerators, which are able to process vast amounts of text data, mostly scraped from the Internet. The artificial neural networks which are built can contain from tens of millions and up to billions of weights and are (pre-)trained using self-supervised learning and semi-supervised learning. Transformer architecture contributed to faster training. Alternative architectures include the mixture of experts (MoE), which has been proposed by Google, starting with sparsely-gated ones in 2017, Gshard in 2021 to GLaM in 2022.
+As language models, they work by taking an input text and repeatedly predicting the next token or word. Up to 2020, fine tuning was the only way a model could be adapted to be able to accomplish specific tasks. Larger sized models, such as GPT-3, however, can be prompt-engineered to achieve similar results. They are thought to acquire embodied knowledge about syntax, semantics and "ontology" inherent in human language corpora, but also inaccuracies and biases present in the corpora.
+""".strip()
+
+exercise = create_reading_exercise(article)
+print(exercise)
+```
+
+
+
 
 ## 生成可打印的Word文档
 
@@ -292,7 +311,7 @@ Specific changes to the new TOEFL iBT include a shorter reading section, a more 
 
 
 create_answer = LmFunction.create(
-    instruction="Answer the question base on the given article",
+    instruction="Answer the question base on the given article in one sentence",
     examples=[
         Example(
             input={
@@ -394,13 +413,13 @@ def generate_worddoc(exercise):
 # 函数定义完了，让我们来测试一下
 
 article = """
-As house prices have climbed, saving for a down payment is out of reach for many Canadians, particularly young people. Today, the Honourable Marc Miller, Minister of Immigration, Refugees and Citizenship, shared how the new tax-free First Home Savings Account is available and helping put home ownership back within reach of Canadians across the country.
-The new tax-free First Home Savings Account is a registered savings account that helps Canadians become first-time home buyers by contributing up to $8,000 per year (up to a lifetime limit of $40,000) for their first down payment within 15 years. To help Canadians reach their savings goals, First Home Savings Account contributions are tax deductible on annual income tax returns, like a Registered Retirement Savings Plan (RRSP). Like a Tax‑Free Savings Account, withdrawals to purchase a first home, including any investment income on contributions, are non-taxable. Tax-free in; tax-free out.
-Financial institutions have been offering the First Home Savings Account to Canadians since April 1, 2023, and it’s now available at 7 financial institutions, with more set to offer it soon.
+A large language model (LLM) is a language model characterized by its large size. Their size is enabled by AI accelerators, which are able to process vast amounts of text data, mostly scraped from the Internet. The artificial neural networks which are built can contain from tens of millions and up to billions of weights and are (pre-)trained using self-supervised learning and semi-supervised learning. Transformer architecture contributed to faster training. Alternative architectures include the mixture of experts (MoE), which has been proposed by Google, starting with sparsely-gated ones in 2017, Gshard in 2021 to GLaM in 2022.
+As language models, they work by taking an input text and repeatedly predicting the next token or word. Up to 2020, fine tuning was the only way a model could be adapted to be able to accomplish specific tasks. Larger sized models, such as GPT-3, however, can be prompt-engineered to achieve similar results. They are thought to acquire embodied knowledge about syntax, semantics and "ontology" inherent in human language corpora, but also inaccuracies and biases present in the corpora.
 """.strip()
 
 # 生成阅读练习
 exercise = create_reading_exercise(article)
+print(exercise)
 
 # 转换成word格式， 并写入`./output.docx`
 generate_worddoc(exercise)

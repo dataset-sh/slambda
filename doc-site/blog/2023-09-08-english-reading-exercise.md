@@ -83,6 +83,7 @@ With slambda, implementing these functions is straightforward. We only need to p
 To learn more about how to load openai API key，you can visit <a href="/docs/tips/apikey" target="_blank">our related article</a>
 
 ```python title="how to load Openai API key"
+import os
 import openai
 from dotenv import load_dotenv
 # This file contains OpenAI API KEY
@@ -118,7 +119,7 @@ Specific changes to the new TOEFL iBT include a shorter reading section, a more 
 
 
 create_answer = LmFunction.create(
-    instruction="Answer the question base on the given article",
+    instruction="Answer the question base on the given article in one sentence",
     examples=[
         Example(
             input={
@@ -171,8 +172,20 @@ def create_reading_exercise(reading_content):
 exercise = create_reading_exercise(article)
 
 ```
-
 In the example above, both `create_questions` and `create_wrong_answers` return a `list[str]`, while `create_answer` returns a single `str`.
+
+Now, let's grab a Wikipedia article and test it out. For example, we can use this (one)[https://en.wikipedia.org/wiki/Large_language_model]
+
+```python
+article = """
+A large language model (LLM) is a language model characterized by its large size. Their size is enabled by AI accelerators, which are able to process vast amounts of text data, mostly scraped from the Internet. The artificial neural networks which are built can contain from tens of millions and up to billions of weights and are (pre-)trained using self-supervised learning and semi-supervised learning. Transformer architecture contributed to faster training. Alternative architectures include the mixture of experts (MoE), which has been proposed by Google, starting with sparsely-gated ones in 2017, Gshard in 2021 to GLaM in 2022.
+As language models, they work by taking an input text and repeatedly predicting the next token or word. Up to 2020, fine tuning was the only way a model could be adapted to be able to accomplish specific tasks. Larger sized models, such as GPT-3, however, can be prompt-engineered to achieve similar results. They are thought to acquire embodied knowledge about syntax, semantics and "ontology" inherent in human language corpora, but also inaccuracies and biases present in the corpora.
+""".strip()
+
+exercise = create_reading_exercise(article)
+print(exercise)
+```
+
 
 ## Generating a MS Word Document
 
@@ -302,7 +315,7 @@ Specific changes to the new TOEFL iBT include a shorter reading section, a more 
 
 
 create_answer = LmFunction.create(
-    instruction="Answer the question base on the given article",
+    instruction="Answer the question base on the given article in one sentence",
     examples=[
         Example(
             input={
@@ -403,9 +416,8 @@ def generate_worddoc(exercise):
 # We have everything now, let's test them.
 
 article = """
-As house prices have climbed, saving for a down payment is out of reach for many Canadians, particularly young people. Today, the Honourable Marc Miller, Minister of Immigration, Refugees and Citizenship, shared how the new tax-free First Home Savings Account is available and helping put home ownership back within reach of Canadians across the country.
-The new tax-free First Home Savings Account is a registered savings account that helps Canadians become first-time home buyers by contributing up to $8,000 per year (up to a lifetime limit of $40,000) for their first down payment within 15 years. To help Canadians reach their savings goals, First Home Savings Account contributions are tax deductible on annual income tax returns, like a Registered Retirement Savings Plan (RRSP). Like a Tax‑Free Savings Account, withdrawals to purchase a first home, including any investment income on contributions, are non-taxable. Tax-free in; tax-free out.
-Financial institutions have been offering the First Home Savings Account to Canadians since April 1, 2023, and it’s now available at 7 financial institutions, with more set to offer it soon.
+A large language model (LLM) is a language model characterized by its large size. Their size is enabled by AI accelerators, which are able to process vast amounts of text data, mostly scraped from the Internet. The artificial neural networks which are built can contain from tens of millions and up to billions of weights and are (pre-)trained using self-supervised learning and semi-supervised learning. Transformer architecture contributed to faster training. Alternative architectures include the mixture of experts (MoE), which has been proposed by Google, starting with sparsely-gated ones in 2017, Gshard in 2021 to GLaM in 2022.
+As language models, they work by taking an input text and repeatedly predicting the next token or word. Up to 2020, fine tuning was the only way a model could be adapted to be able to accomplish specific tasks. Larger sized models, such as GPT-3, however, can be prompt-engineered to achieve similar results. They are thought to acquire embodied knowledge about syntax, semantics and "ontology" inherent in human language corpora, but also inaccuracies and biases present in the corpora.
 """.strip()
 
 # Generate a reading exercise
