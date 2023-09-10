@@ -247,6 +247,11 @@ generate_worddoc(exercise)
 ```
 现在你就可以打印`output.docx`，开始你的英语练习了。
 
+### 下载样品
+
+如上代码生成的结果会类似这样，但是因为语言模型的随机性，具体效果可能不一样。
+<a href="/downloads/raeding-exercise-example.docx" target="_blank">点击下载</a>
+
 ## 完整代码
 
 ### 依赖库

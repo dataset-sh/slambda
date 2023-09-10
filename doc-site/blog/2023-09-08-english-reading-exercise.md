@@ -248,6 +248,14 @@ generate_worddoc(exercise)
 
 You can now print out `output.docs` and use it as an ESL learning material.
 
+
+### Download Example
+
+The results generated from the above code will be similar to this file, but due to the stochastic natural of language models, the specific outcome may vary.
+<a href="/downloads/raeding-exercise-example.docx" target="_blank">Download Example Here</a>
+
+
+
 ## The complete source code
 
 ### Install dependencies
