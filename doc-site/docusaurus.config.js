@@ -16,7 +16,7 @@ const config = {
     // For GitHub pages deployment, it is often '/<projectName>/'
     baseUrl: '/',
 
-    scripts: [{src: 'https://plausible.io/js/script.js', defer: true, 'data-domain': 'slambda.dataset.sh'}],
+    scripts: [{ src: 'https://plausible.io/js/script.js', defer: true, 'data-domain': 'slambda.dataset.sh' }],
 
     // GitHub pages deployment config.
     // If you aren't using GitHub pages, you don't need these.
@@ -31,7 +31,7 @@ const config = {
     // to replace "en" with "zh-Hans".
     i18n: {
         defaultLocale: 'en',
-        locales: ['en'],
+        locales: ['en', 'zh'],
     },
 
     presets: [
@@ -61,7 +61,7 @@ const config = {
     ],
 
     themeConfig:
-    /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
+        /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
         ({
             // Replace with your project's social card
             image: 'img/slambda-social-large.png',
@@ -75,7 +75,7 @@ const config = {
                     name: 'keywords',
                     content: 'nlp, entailment, nli, chatgpt, openai, api, model, text function, sentiment'
                 },
-                {name: 'twitter:card', content: 'summary_large_image'},
+                { name: 'twitter:card', content: 'summary_large_image' },
             ],
             navbar: {
                 title: 'sLambda',
@@ -90,7 +90,22 @@ const config = {
                         position: 'left',
                         label: 'Docs',
                     },
-                    // { to: '/blog', label: 'Blog', position: 'left' },
+                    { to: '/blog', label: 'Blog', position: 'left' },
+                    // {
+                    //     type: 'dropdown',
+                    //     label: 'Related Projects',
+                    //     position: 'left',
+                    //     items: [
+                    //         {
+                    //             label: 'dataset.sh',
+                    //             href: 'https://dataset.sh',
+                    //         }
+                    //     ],
+                    // },
+                    {
+                        type: 'localeDropdown',
+                        position: 'right',
+                    },
                     {
                         href: 'https://github.com/dataset-sh/slambda',
                         label: 'GitHub',

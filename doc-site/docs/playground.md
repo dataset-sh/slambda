@@ -24,7 +24,7 @@ from dotenv import load_dotenv
 import openai
 
 # See https://slambda.dataset.sh/docs/tips/apikey on how to use dotenv
-load_dotenv(dotenv_path='.local.env')
+load_dotenv(dotenv_path='.env.local')
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 from slambda.playground import PlaygroundApp
