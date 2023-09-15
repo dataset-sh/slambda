@@ -1,0 +1,5 @@
+[run]
+omit =
+    tests/**/*
+    src/slambda/contrib/**/*
+    src/slambda/playground.py
