@@ -1,5 +1,7 @@
 # Sλ: Getting Started
 
+[![codecov](https://codecov.io/gh/dataset-sh/slambda/graph/badge.svg?token=MPNI0H3U7C)](https://codecov.io/gh/dataset-sh/slambda)
+
 ## What does slambda do?
 
 Integrating language model such as GPT into your code can be a difficult process. sLambda simplifies the process by
