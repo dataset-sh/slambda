@@ -12,13 +12,10 @@ exclude = [
     "/utils",
 ]
 
-artifacts = [
-    "playground.frontend"
-]
 
 [project]
 name = "slambda"
-version = "0.0.13"
+version = "0.0.14"
 authors = [
     { name = "Hao Wu", email = "haowu@dataset.sh" },
 ]
@@ -34,7 +31,6 @@ classifiers = [
 ]
 dependencies = [
     'pydantic>=2.0.0,<3.0.0',
-    'flask>=2.0.0,<3.0.0',
     "openai"
 ]
 license = { text = "MIT License" }
