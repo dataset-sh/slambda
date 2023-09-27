@@ -8,11 +8,15 @@ sidebar_position: 7
 
 我们还提供了一个Playground网页应用，作为您的slambda函数的简单Web界面。
 
+```shell title="安装 Playground"
+pip install slambda_playground
+```
+
 启动Playground应用:
 
 ```bash title='命令行开启'
 # 将 ~/.openai.key 更改为您的 OPENAI_API_KEY_PATH，或使用 OPENAI_API_KEY 变量
-OPENAI_API_KEY_PATH=~/.openai.key python -m slambda.playground
+OPENAI_API_KEY_PATH=~/.openai.key python -m slambda_playground.playground
 ```
 
 ```python title='程序中开启'
@@ -26,7 +30,7 @@ import openai
 load_dotenv(dotenv_path='.env.local')
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
-from slambda.playground import PlaygroundApp
+from slambda_playground import PlaygroundApp
 
 app = PlaygroundApp()
 app.run()
@@ -34,7 +38,7 @@ app.run()
 
 ```python title='Running a single function'
 from slambda import LmFunction, Example
-from slambda.playground import PlaygroundApp
+from slambda_playground import PlaygroundApp
 
 hello_world_fn = LmFunction.create(
     'print hello world',

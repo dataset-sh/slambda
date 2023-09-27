@@ -8,11 +8,16 @@ sidebar_position: 7
 
 We also include a playground app as a simple web interface for you slambda functions.
 
+To install:
+```shell
+pip install slambda_playground
+```
+
 To start a playground app:
 
 ```bash title='Command Line'
 #change ~/.openai.key to your OPENAI_API_KEY_PATH or use the variable OPENAI_API_KEY 
-OPENAI_API_KEY_PATH=~/.openai.key python -m slambda.playground
+OPENAI_API_KEY_PATH=~/.openai.key python -m slambda_playground.app
 ```
 
 ```python title='Programmatically'
@@ -27,7 +32,7 @@ import openai
 load_dotenv(dotenv_path='.env.local')
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
-from slambda.playground import PlaygroundApp
+from slambda_playground import PlaygroundApp
 
 app = PlaygroundApp()
 app.run()
@@ -35,7 +40,7 @@ app.run()
 
 ```python title='Running a single function'
 from slambda import LmFunction, Example
-from slambda.playground import PlaygroundApp
+from slambda_playground import PlaygroundApp
 
 hello_world_fn = LmFunction.create(
     'print hello world',
