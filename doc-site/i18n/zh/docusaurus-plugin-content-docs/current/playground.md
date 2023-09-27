@@ -11,7 +11,6 @@ sidebar_position: 7
 ```shell title="安装 Playground"
 pip install slambda_playground
 ```
-
 启动Playground应用:
 
 ```bash title='命令行开启'
