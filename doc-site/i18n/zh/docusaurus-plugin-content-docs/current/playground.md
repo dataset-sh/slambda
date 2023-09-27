@@ -15,7 +15,7 @@ pip install slambda_playground
 
 ```bash title='命令行开启'
 # 将 ~/.openai.key 更改为您的 OPENAI_API_KEY_PATH，或使用 OPENAI_API_KEY 变量
-OPENAI_API_KEY_PATH=~/.openai.key python -m slambda_playground.playground
+OPENAI_API_KEY_PATH=~/.openai.key python -m slambda_playground.app
 ```
 
 ```python title='程序中开启'
